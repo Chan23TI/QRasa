@@ -17,6 +17,11 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
+                <div class="hidden space-x-8 flex-grow justify-center sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('menu.index')" :active="request()->routeIs('menu.index')">
+                        {{ __('Menu') }}
+                    </x-nav-link>
+                </div>
                 @endauth
             </div>
 
