@@ -21,6 +21,30 @@
                     @enderror
                 </div>
                 <div class="mb-4">
+                    <label class="block text-sm font-medium">Diskon</label>
+                    <input type="text" name="diskon" value="{{ $menu->diskon }}"
+                        class="mt-1 block w-full border-gray-300 rounded-md" required />
+                    @error('diskon')
+                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Kategori</label>
+                    <input type="text" name="kategori" value="{{ $menu->kategori }}"
+                        class="mt-1 block w-full border-gray-300 rounded-md" required />
+                    @error('kategori')
+                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium">Stok</label>
+                    <input type="text" name="stok" value="{{ $menu->stok }}"
+                        class="mt-1 block w-full border-gray-300 rounded-md" required />
+                    @error('stok')
+                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                    @enderror
+                </div>
+                <div class="mb-4">
                     <label class="block text-sm font-medium">Harga</label>
                     <input type="text" name="harga" value="{{ $menu->harga }}"
                         class="mt-1 block w-full border-gray-300 rounded-md" required />
@@ -38,7 +62,7 @@
                         <span class="text-red-700  py-2 rounded">{{ $message }}</span>
                     @enderror
                 </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Update</button>
+                <button type="submit" class="bg-orenTua text-white px-4 py-2 rounded">Update</button>
             </form>
     </div>
 

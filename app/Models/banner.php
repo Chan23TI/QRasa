@@ -10,4 +10,8 @@ class banner extends Model
         'nama',
         'gambar',
     ];
+    public function menus()
+    {
+        return $this->hasMany(Menu::class);
+    }
 }

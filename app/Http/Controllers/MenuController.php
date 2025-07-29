@@ -1,10 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use App\Models\menu;
+use App\Models\Banner;
+use App\Models\Menu;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
 
 class MenuController extends Controller
@@ -12,73 +11,86 @@ class MenuController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-{
-    $menu = Menu::orderBy('created_at', 'desc')->get(); //Menampilkan menu terbaru
-    return view('menu.index', compact('menu'));
-}
+    public function index(Request $request)
+    {
+        // Retrieve all menu items, ordered by creation date
+        // $menu = Menu::orderBy('created_at', 'desc')->get();
+        // Retrieve stores for the sidebar (adjust if needed)
+        // return view('menu.index', compact('menu', 'banner'));{
+        // Ambil semua banner untuk dropdown/filter
+        $banners = Banner::all();
+
+        // Cek apakah ada parameter banner_id di URL
+        if ($request->filled('banner_id')) {
+            $selectedBanner = Banner::with('menus')->findOrFail($request->banner_id);
+            $menu           = $selectedBanner->menus;
+        } else {
+            $menu           = Menu::all();
+            $selectedBanner = null;
+        }
+
+        return view('menu.index', compact('menu', 'banners', 'selectedBanner'));
+    }
 
     public function create()
-    {
-        return view('menu.create');
-    }
+    {$banners = Banner::all();
+        return view('menu.create', compact('banners'));}
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'harga' => 'required|numeric',
-            'stok' => 'required|numeric',
-            'diskon' => 'nullable|numeric',
-            'kategori' => 'required|numeric',
+            'nama'      => 'required|string|max:255',
+            'harga'     => 'required|numeric',
+            'stok'      => 'required|numeric',
+            'diskon'    => 'nullable|numeric',
+            'kategori'  => 'required|string',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'gambar'    => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
+            'banner_id' => 'nullable|exists:banners,id',
         ]);
 
-        $menu = new Menu();
-        $menu->nama = $validated['nama'];
-        $menu->harga = $validated['harga'];
+        $menu            = new Menu();
+        $menu->nama      = $validated['nama'];
+        $menu->harga     = $validated['harga'];
         $menu->deskripsi = $validated['deskripsi'];
-        $menu->stok = $validated['stok'];
-        $menu->diskon = $validated['diskon'];
-        $menu->kategori = $validated['kategori'];
+        $menu->stok      = $validated['stok'];
+        $menu->diskon    = $validated['diskon'];
+        $menu->kategori  = $validated['kategori'];
+        $menu->banner_id = $validated['banner_id'];
 
         if ($request->hasFile('gambar')) {
             $menu->gambar = $request->file('gambar')->store('images', 'public');
         }
 
         $menu->save();
-
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil ditambahkan!');
+        return redirect()->route('menu.index', ['banner_id' => $menu->banner_id])
+            ->with('success', 'Menu berhasil ditambahkan!');
     }
 
-    public function edit(Menu $menu)
-    {
-        return view('menu.edit', compact('menu'));
-    }
+    public function edit($id)
+    {$menu = Menu::findOrFail($id);
+        $banners                         = Banner::all();
+        return view('menu.edit', compact('menu', 'banners'));}
 
-    public function update(Request $request, Menu $menu)
-    {
-        $validated = $request->validate([
-            'nama' => 'required|string|max:255',
-            'harga' => 'required|numeric',
-            'stok' => 'required|numeric',
-            'diskon' => 'nullable|numeric',
-            'kategori' => 'required|numeric',
+    public function update(Request $request, $id)
+    {$menu = Menu::find($id);
+        $validated                       = $request->validate([
+            'nama'      => 'required|string|max:255',
+            'harga'     => 'required|numeric',
+            'stok'      => 'required|numeric',
+            'diskon'    => 'nullable|numeric',
+            'kategori'  => 'required|string',
             'deskripsi' => 'required|string',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:2048',
+            'gambar'    => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
         ]);
 
-        $menu->nama = $validated['nama'];
+        $menu->nama  = $validated['nama'];
         $menu->harga = $validated['harga'];
-        $menu->deskripsi = $validated['deskripsi'];
-        $menu->stok = $validated['stok'];
-        $menu->diskon = $validated['diskon'];
-        $menu->kategori = $validated['kategori'];
-
-
-        // Hapus elemen HTML yang tidak diinginkan dari deskripsi
+        // Remove unwanted HTML from the description
         $menu->deskripsi = strip_tags($validated['deskripsi']);
+        $menu->stok      = $validated['stok'];
+        $menu->diskon    = $validated['diskon'];
+        $menu->kategori  = $validated['kategori'];
 
         if ($request->hasFile('gambar')) {
             if ($menu->gambar) {
@@ -88,17 +100,32 @@ class MenuController extends Controller
         }
 
         $menu->save();
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil diperbarui!');
-    }
-
-
-    public function destroy(Menu $menu)
+        return redirect()->route('menu.index')->with('success', 'Menu berhasil diperbarui!');}
+    public function destroy($id)
     {
+        $menu = Menu::find($id);
         if ($menu->gambar) {
             Storage::delete('public/' . $menu->gambar);
         }
+        if ($menu) {
+            $menu->delete();
+            return redirect()->back()->with('success', 'Menu berhasil dihapus!');
+        }
+        return redirect()->back()->with('error', 'Menu tidak ditemukan');
+    }
 
-        $menu->delete();
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil dihapus!');
+    public function show(Request $request)
+    {
+        $banners = Banner::all();
+
+        // Cek apakah ada parameter banner_id di URL
+        if ($request->filled('banner_id')) {
+            $selectedBanner = Banner::with('menus')->findOrFail($request->banner_id);
+            $menu           = $selectedBanner->menus;
+        } else {
+            $menu           = Menu::all();
+            $selectedBanner = null;
+        }
+        return view('menu', compact('menu', 'banners', 'selectedBanner'));
     }
 }

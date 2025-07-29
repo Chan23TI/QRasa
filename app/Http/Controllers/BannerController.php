@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\banner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BannerController extends Controller
 {
@@ -12,7 +13,9 @@ class BannerController extends Controller
      */
     public function index()
     {
-        //
+        $banners = Banner::all();
+
+        return view('banner.index', compact('banners'));
     }
 
     /**
@@ -20,7 +23,7 @@ class BannerController extends Controller
      */
     public function create()
     {
-        //
+        return view('banner.create');
     }
 
     /**
@@ -28,7 +31,21 @@ class BannerController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
+        ]);
+
+        $banner = new Banner();
+        $banner->nama = $validated['nama'];
+
+        if ($request->hasFile('gambar')) {
+            $banner->gambar = $request->file('gambar')->store('images', 'public');
+        }
+
+        $banner->save();
+
+        return redirect()->route('banner.index')->with('success', 'Banner berhasil ditambahkan!');
     }
 
     /**
@@ -42,9 +59,10 @@ class BannerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(banner $banner)
+    public function edit($id)
     {
-        //
+        $banners = Banner::findOrFail($id);
+        return view('banner.edit', compact('banners'));
     }
 
     /**
@@ -52,7 +70,22 @@ class BannerController extends Controller
      */
     public function update(Request $request, banner $banner)
     {
-        //
+        $validated = $request->validate([
+            'nama' => 'required|string|max:255',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
+        ]);
+
+        $banner->nama = $validated['nama'];
+
+        if ($request->hasFile('gambar')) {
+            if ($banner->gambar) {
+                Storage::delete('public/' . $banner->gambar);
+            }
+            $banner->gambar = $request->file('gambar')->store('images', 'public');
+        }
+
+        $banner->save();
+        return redirect()->route('banner.index')->with('success', 'Banner berhasil diperbarui!');
     }
 
     /**
@@ -60,6 +93,11 @@ class BannerController extends Controller
      */
     public function destroy(banner $banner)
     {
-        //
+        if ($banner->gambar) {
+            Storage::delete('public/' . $banner->gambar);
+        }
+
+        $banner->delete();
+        return redirect()->route('banner.index')->with('success', ' Banner berhasil dihapus!');
     }
 }
