@@ -21,6 +21,11 @@
                         {{ __('Banner') }}
                     </x-nav-link>
                 </div>
+                <div class="hidden space-x-8 flex-grow justify-center sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
+                        {{ __('User') }}
+                    </x-nav-link>
+                </div>
                 @endauth
             </div>
 

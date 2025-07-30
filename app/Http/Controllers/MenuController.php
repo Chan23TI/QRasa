@@ -13,21 +13,19 @@ class MenuController extends Controller
      */
     public function index(Request $request)
     {
-        // Retrieve all menu items, ordered by creation date
-        // $menu = Menu::orderBy('created_at', 'desc')->get();
-        // Retrieve stores for the sidebar (adjust if needed)
-        // return view('menu.index', compact('menu', 'banner'));{
-        // Ambil semua banner untuk dropdown/filter
         $banners = Banner::all();
+        $query = Menu::query()->orderBy('created_at', 'desc');
 
-        // Cek apakah ada parameter banner_id di URL
+        // Filter berdasarkan banner_id jika ada
         if ($request->filled('banner_id')) {
-            $selectedBanner = Banner::with('menus')->findOrFail($request->banner_id);
-            $menu           = $selectedBanner->menus;
+            $query->where('banner_id', $request->banner_id);
+            $selectedBanner = Banner::findOrFail($request->banner_id);
         } else {
-            $menu           = Menu::all();
             $selectedBanner = null;
         }
+
+        // Menggunakan pagination
+        $menu = $query->paginate(5);
 
         return view('menu.index', compact('menu', 'banners', 'selectedBanner'));
     }

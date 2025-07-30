@@ -1,8 +1,29 @@
 <x-app-layout>
-    <div class="max-w-4xl mx-auto py-6">
-        <h1 class="text-2xl font-bold mb-4">Tambah Menu</h1>
-        <form action="{{ route('menu.store') }}" method="POST" enctype="multipart/form-data">
-            @csrf
+    <div class="flex min-h-screen bg-gray-50">
+        <x-admin-sidebar />
+
+        <!-- Main Content -->
+        <main class="flex-1 ml-64 p-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Tambah Menu Baru</h1>
+                        <p class="text-gray-600 mt-1">Isi form di bawah untuk menambah menu baru</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('menu.index') }}"
+                            class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-hijau1">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Kembali
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <!-- Form Card -->
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden max-w-4xl">
+                <form action="{{ route('menu.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
+                    @csrf
             <div class="mb-4">
                 <label class="block text-sm font-medium">Nama menu</label>
                 <input type="text" name="nama" class="mt-1 block w-full border-gray-300 rounded-md" required />
