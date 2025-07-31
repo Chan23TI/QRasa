@@ -31,6 +31,12 @@
             <div class="container mx-auto px-4">
                 <div class="flex items-center justify-between h-16">
                     <div class="flex items-center">
+                        <img src="{{ asset('img/Logo/LogoKantin.png') }}" alt="Logo QRasa"
+                            class="w-10 h-10 rounded-full mr-3 object-cover" loading="lazy">
+                        <h1 class="text-putih text-xl font-bold">
+                            QRasa
+                    </div>
+                    <div class="flex items-center">
                         <h1 class="text-lg md:text-xl font-bold text-putih truncate max-w-[200px] md:max-w-none">
                             {{ $selectedBanner ? $selectedBanner->nama : 'Semua Kantin' }}
                         </h1>
@@ -107,7 +113,7 @@
                     </div>
                 </div>
 
-                <h2 class="text-2xl font-bold mb-6">Paket Hemat</h2>
+                <h2 class="text-2xl font-bold mb-6" x-show="filteredPaketItems().length > 0">Paket Hemat</h2>
                 <!-- Menu List Paket Hemat -->
                 <div x-show="filteredPaketItems().length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
                     <template x-for="item in filteredPaketItems()" :key="item.id">
@@ -146,9 +152,47 @@
                     </template>
                 </div>
 
-                <h2 class="text-2xl font-bold mb-6">Menu Baru</h2>
+                <h2 class="text-2xl font-bold mb-6 " x-show="filteredMenuBaruItems().length > 0">Menu Baru</h2>
 
-                <h2 class="text-2xl font-bold mb-6">Makanan</h2>
+                 <!-- Menu Baru List -->
+                <div x-show="filteredMenuBaruItems().length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
+                    <template x-for="item in filteredMenuBaruItems()" :key="item.id">
+                        <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                            <!-- Image Section -->
+                            <div class="relative aspect-square w-full overflow-hidden">
+                                <img :src="item.image" :alt="item.name"
+                                    class="w-full h-full object-cover" loading="lazy">
+                                <div x-show="item.discount > 0"
+                                    class="absolute top-2 right-2 bg-orenTua text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
+                                    <span x-text="item.discount + '%'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Content Section -->
+                            <div class="p-3">
+                                <h3 class="font-medium text-gray-800 text-sm sm:text-base mb-1 truncate" x-text="item.name"></h3>
+                                <div class="flex flex-col space-y-1 mb-2">
+                                    <p class="text-sm sm:text-base font-bold text-hijau1"
+                                        x-text="formatPrice(item.price - (item.price * item.discount / 100))">
+                                    </p>
+                                    <template x-if="item.discount > 0">
+                                        <p class="text-xs text-gray-400 line-through"
+                                            x-text="formatPrice(item.price)"></p>
+                                    </template>
+                                </div>
+
+                                <!-- Add to Cart Button -->
+                                <button @click="addToCart(item)"
+                                    class="w-full px-3 py-1.5 bg-hijau1 text-white text-sm rounded-lg hover:bg-hijau1/90 transition-colors duration-200 flex items-center justify-center space-x-1 group">
+                                    <i class="fas fa-plus text-xs group-hover:rotate-180 transition-transform duration-300"></i>
+                                    <span>Tambah</span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <h2 class="text-2xl font-bold mb-6" x-show="filteredMenuItems().length > 0">Makanan</h2>
 
                 <!-- Menu List -->
                 <div x-show="filteredMenuItems().length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
@@ -188,7 +232,7 @@
                     </template>
                 </div>
 
-                <h2 class="text-2xl font-bold mb-6">Minuman</h2>
+                <h2 class="text-2xl font-bold mb-6" x-show="filteredDrinkItems().length > 0">Minuman</h2>
 
                 <!-- Menu List Minuman -->
                 <div x-show="filteredDrinkItems().length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
@@ -226,7 +270,9 @@
                             </div>
                         </div>
                     </template>
-                </div>                <h2 class="text-2xl font-bold mb-6">Snack</h2>
+                </div>
+
+                <h2 class="text-2xl font-bold mb-6" x-show="filteredSnackItems().length > 0">Snack</h2>
                 <!-- Menu List Snack -->
                 <div x-show="filteredSnackItems().length > 0" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
                     <template x-for="item in filteredSnackItems()" :key="item.id">
@@ -303,8 +349,15 @@
                             Total: <span x-text="formatPrice(calculateTotal())"></span>
                         </div>
                         <div class="pt-4">
+                            <select x-model="paymentMethod" class="w-full p-2 border rounded mb-2">
+                                <option value="">Pilih Metode Pembayaran</option>
+                                <option value="cash">Tunai</option>
+                                <option value="transfer">Transfer Bank</option>
+                                <option value="qris">QRIS</option>
+                            </select>
                             <button @click="checkout"
-                                class="w-full bg-oren text-white font-semibold py-2 px-4 rounded hover:bg-orange-500 transition">
+                                x-bind:disabled="!paymentMethod || cart.length === 0"
+                                class="w-full bg-oren text-white font-semibold py-2 px-4 rounded hover:bg-orange-500 transition disabled:opacity-50 disabled:cursor-not-allowed">
                                 Checkout
                             </button>
                         </div>
@@ -316,6 +369,14 @@
             </div>
         </div>
     </div>
+
+    <footer>
+        <div class="bg-hijau1 text-putih py-4">
+            <div class="container mx-auto text-center">
+                <p class="text-sm font-semibold">© {{ date('Y') }} QRasa. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
     <script>
         function app() {
@@ -379,6 +440,50 @@
                 },
                 getTotalItems() {
                     return this.cart.reduce((t, i) => t + i.quantity, 0);
+                },
+                paymentMethod: '', // New property for payment method
+                checkout() {
+                    if (this.cart.length === 0 || !this.paymentMethod) {
+                        alert('Keranjang kosong atau metode pembayaran belum dipilih!');
+                        return;
+                    }
+
+                    fetch('{{ route('pesan.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            cartItems: this.cart.map(item => ({
+                                id: item.id,
+                                quantity: item.quantity
+                            })),
+                            total: this.calculateTotal(),
+                            payment_method: this.paymentMethod
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            this.cart = []; // Clear cart
+                            this.cartOpen = false; // Close cart
+                            window.location.href = data.redirect; // Redirect to summary page
+                        } else {
+                            alert('Terjadi kesalahan: ' + (data.message || 'Silakan coba lagi.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat memproses pesanan.');
+                    });
+                },
+                filteredMenuBaruItems() {
+                    return this.menuItems.filter(item =>
+                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
+                        item.category === 'Menu Baru'
+                    );
                 },
                 filteredMenuItems() {
                     return this.menuItems.filter(item =>

@@ -23,20 +23,44 @@ class PesanController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'cartItems' => 'required|array',
+            'cartItems.*.id' => 'required|exists:menus,id',
+            'cartItems.*.quantity' => 'required|integer|min:1',
+            'total' => 'required|numeric|min:0',
+            'payment_method' => 'required|string',
+        ]);
+
+        $user = auth()->user();
+
+        $pesan = new Pesan();
+        $pesan->user_id = $user->id;
+        $pesan->total = $request->total;
+        $pesan->status = 'pending'; // Atau status awal lainnya
+        $pesan->payment_method = $request->payment_method;
+        $pesan->save();
+
+        $menuQuantities = [];
+        foreach ($request->cartItems as $item) {
+            $menuQuantities[$item['id']] = ['quantity' => $item['quantity']];
+
+            // Kurangi stok menu
+            $menu = \App\Models\Menu::find($item['id']);
+            if ($menu) {
+                $menu->stok -= $item['quantity'];
+                $menu->save();
+            }
+        }
+        $pesan->menus()->attach($menuQuantities);
+
+        return redirect()->route('pesan.summary', $pesan->id)->with('success', 'Pesanan berhasil dibuat!');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(pesan $pesan)
     {
-        //
+        return view('pesan.summary', compact('pesan'));
     }
 
     /**

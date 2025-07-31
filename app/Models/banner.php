@@ -14,4 +14,9 @@ class banner extends Model
     {
         return $this->hasMany(Menu::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -5,16 +5,31 @@ use App\Models\Banner;
 use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class MenuController extends Controller
 {
+    public function __construct()
+    {
+        // Remove authorizeResource from constructor
+        // $this->authorizeResource(Menu::class, 'menu');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $banners = Banner::all();
+        $this->authorize('viewAny', Menu::class);
+
+        $user = Auth::user();
         $query = Menu::query()->orderBy('created_at', 'desc');
+
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        $banners = Banner::all();
 
         // Filter berdasarkan banner_id jika ada
         if ($request->filled('banner_id')) {
@@ -31,12 +46,25 @@ class MenuController extends Controller
     }
 
     public function create()
-    {$banners = Banner::all();
-        return view('menu.create', compact('banners'));}
+    {
+        $this->authorize('create', Menu::class);
+
+        $user = Auth::user();
+        if ($user->role !== 'admin') {
+            $banners = $user->banners; // Get banners owned by the current user
+        } else {
+            $banners = Banner::all();
+        }
+        return view('menu.create', compact('banners'));
+    }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $this->authorize('create', Menu::class);
+
+        $user = Auth::user();
+
+        $rules = [
             'nama'      => 'required|string|max:255',
             'harga'     => 'required|numeric',
             'stok'      => 'required|numeric',
@@ -44,8 +72,16 @@ class MenuController extends Controller
             'kategori'  => 'required|string',
             'deskripsi' => 'required|string',
             'gambar'    => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
-            'banner_id' => 'nullable|exists:banners,id',
-        ]);
+        ];
+
+        if ($user->role === 'admin') {
+            $rules['banner_id'] = 'required|exists:banners,id';
+        } else {
+            // For non-admin, banner_id will be set automatically
+            $rules['banner_id'] = 'nullable'; // Still allow it in validation but it will be overridden
+        }
+
+        $validated = $request->validate($rules);
 
         $menu            = new Menu();
         $menu->nama      = $validated['nama'];
@@ -54,7 +90,18 @@ class MenuController extends Controller
         $menu->stok      = $validated['stok'];
         $menu->diskon    = $validated['diskon'];
         $menu->kategori  = $validated['kategori'];
-        $menu->banner_id = $validated['banner_id'];
+        $menu->user_id = $user->id;
+
+        if ($user->role !== 'admin') {
+            $userBanner = $user->banners()->first();
+            if ($userBanner) {
+                $menu->banner_id = $userBanner->id;
+            } else {
+                return redirect()->back()->withErrors(['banner' => 'Anda harus memiliki setidaknya satu banner untuk menambahkan menu.']);
+            }
+        } else {
+            $menu->banner_id = $validated['banner_id'];
+        }
 
         if ($request->hasFile('gambar')) {
             $menu->gambar = $request->file('gambar')->store('images', 'public');
@@ -65,14 +112,19 @@ class MenuController extends Controller
             ->with('success', 'Menu berhasil ditambahkan!');
     }
 
-    public function edit($id)
-    {$menu = Menu::findOrFail($id);
-        $banners                         = Banner::all();
-        return view('menu.edit', compact('menu', 'banners'));}
+    public function edit(Menu $menu)
+    {
+        $this->authorize('update', $menu);
 
-    public function update(Request $request, $id)
-    {$menu = Menu::find($id);
-        $validated                       = $request->validate([
+        $banners = Banner::all();
+        return view('menu.edit', compact('menu', 'banners'));
+    }
+
+    public function update(Request $request, Menu $menu)
+    {
+        $this->authorize('update', $menu);
+
+        $validated = $request->validate([
             'nama'      => 'required|string|max:255',
             'harga'     => 'required|numeric',
             'stok'      => 'required|numeric',
@@ -98,30 +150,34 @@ class MenuController extends Controller
         }
 
         $menu->save();
-        return redirect()->route('menu.index')->with('success', 'Menu berhasil diperbarui!');}
-    public function destroy($id)
+        return redirect()->route('menu.index')->with('success', 'Menu berhasil diperbarui!');
+    }
+
+    public function destroy(Menu $menu)
     {
-        $menu = Menu::find($id);
+        $this->authorize('delete', $menu);
+
         if ($menu->gambar) {
             Storage::delete('public/' . $menu->gambar);
         }
-        if ($menu) {
-            $menu->delete();
-            return redirect()->back()->with('success', 'Menu berhasil dihapus!');
-        }
-        return redirect()->back()->with('error', 'Menu tidak ditemukan');
+        $menu->delete();
+        return redirect()->back()->with('success', 'Menu berhasil dihapus!');
     }
 
     public function show(Request $request)
     {
+        // No authorization needed for public view
+        $query = Menu::query();
+
         $banners = Banner::all();
 
         // Cek apakah ada parameter banner_id di URL
         if ($request->filled('banner_id')) {
             $selectedBanner = Banner::with('menus')->findOrFail($request->banner_id);
-            $menu           = $selectedBanner->menus;
+            $menu           = $selectedBanner->menus()->get();
         } else {
-            $menu           = Menu::all();
+            // If no specific banner_id, show all menus that belong to an existing banner
+            $menu = $query->whereHas('banner')->get();
             $selectedBanner = null;
         }
         return view('menu', compact('menu', 'banners', 'selectedBanner'));

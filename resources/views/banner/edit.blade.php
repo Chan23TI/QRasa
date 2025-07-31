@@ -23,14 +23,14 @@
 
             <!-- Form Card -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden max-w-4xl">
-                <form action="{{ route('banner.update', $banners->id) }}" method="POST" enctype="multipart/form-data" class="p-6">
+                <form action="{{ route('banner.update', $banner->id) }}" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
                     @method('PUT')
 
                     <!-- Image Preview -->
                     <div class="w-full mb-6">
                         <div class="relative aspect-video rounded-lg overflow-hidden bg-gray-100 mb-4">
-                            <img id="image-preview" src="{{ Storage::url($banners->gambar) }}" alt="Preview"
+                            <img id="image-preview" src="{{ Storage::url($banner->gambar) }}" alt="Preview"
                                 class="w-full h-full object-cover">
                             <div id="image-placeholder"
                                 class="absolute inset-0 items-center justify-center text-gray-400 hidden">
@@ -51,7 +51,7 @@
                     <!-- Nama Kantin -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Nama Kantin</label>
-                        <input type="text" name="nama" value="{{ old('nama', $banners->nama) }}"
+                        <input type="text" name="nama" value="{{ old('nama', $banner->nama) }}"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                         @error('nama')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

@@ -1,9 +1,6 @@
 <x-app-layout>
     <div class="flex min-h-screen bg-gray-50">
         <x-admin-sidebar />
-        
-
-
         <!-- Main Content -->
         <main class="flex-1 ml-64 p-8">
             <!-- Header -->
@@ -55,14 +52,14 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
                         <tr>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Menu</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diskon</th>
-                            <th class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gambar</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Menu</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deskripsi</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Harga</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stok</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diskon</th>
+                            <th class="px-6 py-3  text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">

@@ -1,37 +1,11 @@
 <nav x-data="{ open: false }" class="bg-hijau1 border-b border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                    <img src="{{ asset('img/Logo/LogoKantin.png') }}" alt="logo" class="block h-9 w-auto fill-current text-putih rounded-lg">
-                </div>
-
-                <!-- Navigation Links -->
-                @auth
-                <div class="hidden space-x-8 flex-grow justify-center sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('menu.index')" :active="request()->routeIs('menu.index')">
-                        {{ __('Menu') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 flex-grow justify-center sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('banner.index')" :active="request()->routeIs('banner.index')">
-                        {{ __('Banner') }}
-                    </x-nav-link>
-                </div>
-                <div class="hidden space-x-8 flex-grow justify-center sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
-                        {{ __('User') }}
-                    </x-nav-link>
-                </div>
-                @endauth
-            </div>
+        <div class="flex justify-end h-16">
 
             <!-- Settings Dropdown -->
             @auth
-            <div class="hidden sm:flex sm:items-center sm:ml-6">
+            <div class="hidden  sm:flex sm:items-center sm:ml-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -55,7 +29,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
@@ -80,12 +54,6 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         @auth
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-        </div>
-
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             <div class="px-4">
@@ -103,7 +71,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

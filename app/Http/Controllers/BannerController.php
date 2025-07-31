@@ -5,15 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\banner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class BannerController extends Controller
 {
+    public function __construct()
+    {
+        $this->authorizeResource(Banner::class, 'banner');
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $banners = Banner::latest()->paginate(5);
+        $user = Auth::user();
+        $query = Banner::query()->latest();
+
+        if ($user->role !== 'admin') {
+            $query->where('user_id', $user->id);
+        }
+
+        $banners = $query->paginate(5);
 
         return view('banner.index', compact('banners'));
     }
@@ -38,6 +51,7 @@ class BannerController extends Controller
 
         $banner = new Banner();
         $banner->nama = $validated['nama'];
+        $banner->user_id = Auth::id();
 
         if ($request->hasFile('gambar')) {
             $banner->gambar = $request->file('gambar')->store('images', 'public');
@@ -59,10 +73,9 @@ class BannerController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(Banner $banner) // Changed from $id to Banner $banner
     {
-        $banners = Banner::findOrFail($id);
-        return view('banner.edit', compact('banners'));
+        return view('banner.edit', compact('banner')); // Changed from banners to banner
     }
 
     /**
