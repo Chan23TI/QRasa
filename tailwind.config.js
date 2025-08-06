@@ -21,7 +21,7 @@ export default {
                 orenTua: "#ec5228",
                 putih: "#efefef",
             },
-        },
+            },
     },
 
     plugins: [forms],

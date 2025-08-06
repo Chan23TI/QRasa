@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\BannerController;
+use App\Http\Controllers\PesanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Models\banner;
@@ -15,7 +16,14 @@ Route::get('/', function () {
 Route::get('/menus', [MenuController::class, 'show'])->name('menu.show');
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// Pesan Routes
+Route::post('/pesan', [PesanController::class, 'store'])->name('pesan.store');
+Route::get('/pesan/summary/{ids}', [PesanController::class, 'multiSummary'])->name('pesan.multi_summary');
+Route::get('/pesan/{pesan}/summary', [PesanController::class, 'show'])->name('pesan.summary');
+
+Route::patch('/pesan/{pesan}/update-status', [PesanController::class, 'updateStatus'])->name('pesan.updateStatus');
+
+Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // User Management
     Route::resource('user', UserController::class);
@@ -32,9 +40,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     'destroy' => "menu.destroy"])->except('show');
     Route::resource('banner', BannerController::class)->except('show');
 
-    // Pesan Routes
-    Route::post('/pesan', [App\Http\Controllers\PesanController::class, 'store'])->name('pesan.store');
-    Route::get('/pesan/{pesan}/summary', [App\Http\Controllers\PesanController::class, 'show'])->name('pesan.summary');
+    // Meja Routes (Admin only)
+    Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
+        Route::resource('meja', \App\Http\Controllers\MejaController::class);
+    });
+
+    Route::get('/pesan', [PesanController::class, 'index'])->name('pesan.index');
 });
 
 require __DIR__.'/auth.php';

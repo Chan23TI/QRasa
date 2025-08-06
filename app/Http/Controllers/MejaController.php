@@ -2,64 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\meja;
+use App\Models\Meja;
 use Illuminate\Http\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class MejaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Meja::query();
+
+        if ($request->has('search')) {
+            $query->where('nomor_meja', 'like', '%' . $request->search . '%');
+        }
+
+        $mejas = $query->paginate(5);
+
+        return view('meja.index', compact('mejas'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('meja.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nomor_meja' => 'required|integer|unique:mejas',
+        ]);
+
+        $meja = new Meja();
+        $meja->nomor_meja = $request->nomor_meja;
+        $meja->save(); // Save to get the ID
+
+        $qrCodeUrl = route('menu.show', ['meja_id' => $meja->id]);
+        $qrCode = QrCode::size(200)->generate($qrCodeUrl);
+
+        $meja->qr_code = 'qrcodes/meja-' . $meja->id . '.svg';
+
+        // Ensure the directory exists
+        $directory = storage_path('app/public/qrcodes');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+
+        file_put_contents(storage_path('app/public/' . $meja->qr_code), $qrCode);
+
+        $meja->save();
+
+        return redirect()->route('meja.index')->with('success', 'Meja berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(meja $meja)
+    public function show(Meja $meja)
     {
-        //
+        return view('meja.show', compact('meja'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(meja $meja)
+    public function edit(Meja $meja)
     {
-        //
+        return view('meja.edit', compact('meja'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, meja $meja)
+    public function update(Request $request, Meja $meja)
     {
-        //
+        $request->validate([
+            'nomor_meja' => 'required|integer|unique:mejas,nomor_meja,' . $meja->id,
+        ]);
+
+        $meja->nomor_meja = $request->nomor_meja;
+        $meja->save();
+
+        return redirect()->route('meja.index')->with('success', 'Meja berhasil diperbarui.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(meja $meja)
+    public function destroy(Meja $meja)
     {
-        //
+        // Delete the QR code file
+        if (file_exists(storage_path('app/public/' . $meja->qr_code))) {
+            unlink(storage_path('app/public/' . $meja->qr_code));
+        }
+
+        $meja->delete();
+
+        return redirect()->route('meja.index')->with('success', 'Meja berhasil dihapus.');
     }
 }

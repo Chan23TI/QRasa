@@ -17,8 +17,31 @@ class DashboardController extends Controller
 
         // 1. KPI Cards Data
         $totalMenus = $user->menus()->count();
-        $revenueToday = (clone $baseQuery)->whereDate('created_at', Carbon::today())->sum('total');
-        $ordersThisMonth = (clone $baseQuery)->whereMonth('created_at', Carbon::now()->month)->count();
+        
+        $period = $request->input('period', 'today');
+
+        $revenueQuery = (clone $baseQuery);
+        $ordersQuery = (clone $baseQuery);
+
+        switch ($period) {
+            case 'this_week':
+                $revenueQuery->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                $ordersQuery->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+                break;
+            case 'this_month':
+                $revenueQuery->whereMonth('created_at', Carbon::now()->month);
+                $ordersQuery->whereMonth('created_at', Carbon::now()->month);
+                break;
+            case 'today':
+            default:
+                $revenueQuery->whereDate('created_at', Carbon::today());
+                $ordersQuery->whereDate('created_at', Carbon::today());
+                break;
+        }
+
+        $revenue = $revenueQuery->sum('total');
+        $orders = $ordersQuery->count();
+
         $averageOrderValue = (clone $baseQuery)->whereMonth('created_at', Carbon::now()->month)->avg('total');
 
         // 2. Top Selling Menus
@@ -39,41 +62,103 @@ class DashboardController extends Controller
         $pesanans = $user->pesans()->with('user')->latest()->paginate(5);
 
         // 5. Chart Data with Date Filter
-        $period = $request->input('period', 'last_7_days');
-        $startDate = Carbon::now();
+        $chartPeriod = $request->input('chart_period', 'this_month');
+        $labels = [];
+        $data = [];
 
-        switch ($period) {
-            case 'today':
-                $startDate = Carbon::today();
+        switch ($chartPeriod) {
+            case 'this_year':
+                $salesData = $user->pesans()
+                    ->select(
+                        DB::raw('MONTH(created_at) as month'),
+                        DB::raw('SUM(total) as total_sales')
+                    )
+                    ->whereYear('created_at', Carbon::now()->year)
+                    ->groupBy('month')
+                    ->orderBy('month', 'ASC')
+                    ->pluck('total_sales', 'month')->all();
+
+                for ($i = 1; $i <= 12; $i++) {
+                    $labels[] = Carbon::create()->month($i)->format('M');
+                    $data[] = $salesData[$i] ?? 0;
+                }
                 break;
+
             case 'last_30_days':
-                $startDate = Carbon::now()->subDays(30);
+                $startDate = Carbon::now()->subDays(29)->startOfDay();
+                $endDate = Carbon::now()->endOfDay();
+                $salesData = $user->pesans()
+                    ->select(
+                        DB::raw('DATE(created_at) as date'),
+                        DB::raw('SUM(total) as total_sales')
+                    )
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->groupBy('date')
+                    ->orderBy('date', 'ASC')
+                    ->pluck('total_sales', 'date')->all();
+
+                for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+                    $labels[] = $date->format('M d');
+                    $data[] = $salesData[$date->format('Y-m-d')] ?? 0;
+                }
                 break;
+            
             case 'last_7_days':
+                $startDate = Carbon::now()->subDays(6)->startOfDay();
+                $endDate = Carbon::now()->endOfDay();
+                $salesData = $user->pesans()
+                    ->select(
+                        DB::raw('DATE(created_at) as date'),
+                        DB::raw('SUM(total) as total_sales')
+                    )
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->groupBy('date')
+                    ->orderBy('date', 'ASC')
+                    ->pluck('total_sales', 'date')->all();
+
+                for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+                    $labels[] = $date->format('M d');
+                    $data[] = $salesData[$date->format('Y-m-d')] ?? 0;
+                }
+                break;
+
+            case 'this_month':
             default:
-                $startDate = Carbon::now()->subDays(7);
+                $startDate = Carbon::now()->startOfMonth();
+                $endDate = Carbon::now()->endOfMonth();
+                $salesData = $user->pesans()
+                    ->select(
+                        DB::raw('DATE(created_at) as date'),
+                        DB::raw('SUM(total) as total_sales')
+                    )
+                    ->whereBetween('created_at', [$startDate, $endDate])
+                    ->groupBy('date')
+                    ->orderBy('date', 'ASC')
+                    ->pluck('total_sales', 'date')->all();
+
+                for ($date = $startDate; $date <= $endDate; $date->addDay()) {
+                    $labels[] = $date->format('d');
+                    $data[] = $salesData[$date->format('Y-m-d')] ?? 0;
+                }
                 break;
         }
 
-        $salesData = $user->pesans()->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total) as total_sales'))
-            ->where('created_at', '>=', $startDate)
-            ->groupBy('date')->orderBy('date', 'ASC')->get();
-
         $chartData = [
-            'labels' => $salesData->pluck('date')->map(fn ($date) => Carbon::parse($date)->format('M d')),
-            'data' => $salesData->pluck('total_sales'),
+            'labels' => $labels,
+            'data' => $data,
         ];
 
         return view('dashboard', compact(
             'pesanans', 
             'chartData',
             'period',
-            'revenueToday',
-            'ordersThisMonth',
+            'revenue',
+            'orders',
             'averageOrderValue',
             'topSellingMenus',
             'lowStockMenus',
-            'totalMenus'
+            'totalMenus',
+            'chartPeriod'
         ));
     }
 }

@@ -69,7 +69,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-100">
                                             @if ($user->avatar)
-                                                <img src="{{ Storage::url($user->avatar) }}" alt="{{ $user->name }}"
+                                                <img src="{{ str_starts_with($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}"
                                                     class="h-full w-full object-cover">
                                             @else
                                                 <div class="h-full w-full flex items-center justify-center bg-gray-300 text-gray-500">

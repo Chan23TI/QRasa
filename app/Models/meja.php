@@ -10,4 +10,9 @@ class meja extends Model
         'nomor_meja',
         'qr_code',
     ];
+
+    public function pesans()
+    {
+        return $this->hasMany(Pesan::class);
+    }
 }

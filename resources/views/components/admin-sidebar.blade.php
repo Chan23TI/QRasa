@@ -44,6 +44,24 @@
                     <span>Penjualan</span>
                 </a>
             </div>
+            <div>
+                <a href="{{ route('pesan.index') }}"
+                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('pesan.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
+                    <i class="fas fa-shopping-cart w-5 h-5 mr-3"></i>
+                    <span>Pesanan</span>
+                </a>
+            </div>
+            @endif
+
+            <!-- Meja Management (Admin only) -->
+            @if (Auth::check() && Auth::user()->role === 'admin')
+            <div>
+                <a href="{{ route('meja.index') }}"
+                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('meja.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
+                    <i class="fas fa-chair w-5 h-5 mr-3"></i>
+                    <span>Meja</span>
+                </a>
+            </div>
             @endif
 
             <!-- User Management -->

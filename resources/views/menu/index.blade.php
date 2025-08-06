@@ -6,7 +6,7 @@
             <!-- Header -->
             <div class="mb-8">
                 <h1 class="text-2xl font-bold text-gray-800">
-                    {{ $selectedBanner ? $selectedBanner->nama : 'Daftar Menu' }}
+                    Daftar Menu
                 </h1>
                 <p class="text-gray-600 mt-1">Kelola menu kantin dengan mudah</p>
             </div>
@@ -146,32 +146,7 @@
             }
         }
 
-        function searchUserTable() {
-            const searchInput = document.getElementById('searchUserInput');
-            const filter = searchInput.value.toLowerCase();
-            const table = document.querySelector('table');
-            const rows = table.getElementsByTagName('tr');
-
-            for (let i = 1; i < rows.length; i++) {
-                const nameCell = rows[i].getElementsByTagName('td')[0]; // Assuming name is in first column
-                const roleCell = rows[i].getElementsByTagName('td')[1]; // Assuming role is in second column
-                const emailCell = rows[i].getElementsByTagName('td')[2]; // Assuming email is in third column
-
-                if (nameCell && roleCell && emailCell) {
-                    const name = nameCell.textContent || nameCell.innerText;
-                    const role = roleCell.textContent || roleCell.innerText;
-                    const email = emailCell.textContent || emailCell.innerText;
-
-                    if (name.toLowerCase().indexOf(filter) > -1 ||
-                        role.toLowerCase().indexOf(filter) > -1 ||
-                        email.toLowerCase().indexOf(filter) > -1) {
-                        rows[i].style.display = '';
-                    } else {
-                        rows[i].style.display = 'none';
-                    }
-                }
-            }
-        }
+    
     </script>
 
 

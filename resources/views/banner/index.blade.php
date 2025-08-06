@@ -22,12 +22,16 @@
                         </div>
                     </div>
                 </div>
+
+            @if($banners->count() == 0 || (Auth::check() && Auth::user()->role === 'admin'))
                 <a href="{{ route('banner.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-hijau1 text-white rounded-lg hover:bg-hijau1/90 transition-colors duration-150">
                     <i class="fas fa-plus mr-2"></i>
                     <span>Tambah Banner</span>
                 </a>
+                @endif
             </div>
+
 
             @if (session('success'))
                 <div class="mb-8 bg-green-100 p-4 rounded-lg">

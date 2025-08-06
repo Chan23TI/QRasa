@@ -168,18 +168,35 @@ class MenuController extends Controller
     {
         // No authorization needed for public view
         $query = Menu::query();
-
         $banners = Banner::all();
+        $historyPesanan = collect(); // Default to an empty collection
 
         // Cek apakah ada parameter banner_id di URL
         if ($request->filled('banner_id')) {
             $selectedBanner = Banner::with('menus')->findOrFail($request->banner_id);
-            $menu           = $selectedBanner->menus()->get();
+            $menu = $selectedBanner->menus()->get();
         } else {
             // If no specific banner_id, show all menus that belong to an existing banner
             $menu = $query->whereHas('banner')->get();
             $selectedBanner = null;
         }
-        return view('menu', compact('menu', 'banners', 'selectedBanner'));
+
+        // Ambil riwayat pesanan jika meja_id ada
+        if ($request->has('meja_id')) {
+            $meja = \App\Models\meja::find($request->meja_id);
+            if ($meja) {
+                $historyPesanan = $meja->pesans()->with('menus')->latest()->get();
+            }
+        }
+
+        if ($request->ajax()) {
+            return response()->json([
+                'menu' => $menu,
+                'selectedBanner' => $selectedBanner,
+                'historyPesanan' => $historyPesanan,
+            ]);
+        }
+
+        return view('menu', compact('menu', 'banners', 'selectedBanner', 'historyPesanan'));
     }
 }

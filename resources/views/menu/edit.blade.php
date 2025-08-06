@@ -3,7 +3,7 @@
         <x-admin-sidebar />
 
         <!-- Main Content -->
-        <main class="flex-1 ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8">
             <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center justify-between">
@@ -61,7 +61,7 @@
                     <!-- Deskripsi -->
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
-                        <textarea name="deskripsi" rows="3"
+                        <textarea name="deskripsi" id="editor" rows="3"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">{{ old('deskripsi', $menu->deskripsi) }}</textarea>
                         @error('deskripsi')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -74,7 +74,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">Rp</span>
-                                <input type="number" name="harga" value="{{ old('harga', $menu->harga) }}"
+                                <input type="number" name="harga" value="{{ old('harga', $menu->harga) }}" min="0"
                                     class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                             </div>
                             @error('harga')
@@ -83,7 +83,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
-                            <input type="number" name="stok" value="{{ old('stok', $menu->stok) }}"
+                            <input type="number" name="stok" value="{{ old('stok', $menu->stok) }}" min="0"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                             @error('stok')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
@@ -97,10 +97,11 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
                             <select name="kategori"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
+                                <option value="Menu Baru" {{ old('kategori', $menu->kategori) == 'Menu Baru' ? 'selected' : '' }}>Menu Baru</option>
+                                <option value="Paket Hemat" {{ old('kategori', $menu->kategori) == 'Paket Hemat' ? 'selected' : '' }}>Paket Hemat</option>
                                 <option value="Makanan" {{ old('kategori', $menu->kategori) == 'Makanan' ? 'selected' : '' }}>Makanan</option>
                                 <option value="Minuman" {{ old('kategori', $menu->kategori) == 'Minuman' ? 'selected' : '' }}>Minuman</option>
                                 <option value="Snack" {{ old('kategori', $menu->kategori) == 'Snack' ? 'selected' : '' }}>Snack</option>
-                                <option value="Paket" {{ old('kategori', $menu->kategori) == 'Paket' ? 'selected' : '' }}>Paket</option>
                             </select>
                             @error('kategori')
                                 <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

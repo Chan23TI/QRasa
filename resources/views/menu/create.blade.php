@@ -3,7 +3,7 @@
         <x-admin-sidebar />
 
         <!-- Main Content -->
-        <main class="flex-1 ml-64 p-8">
+        <main class="flex-1 md:ml-64 p-4 md:p-8">
             <!-- Header -->
             <div class="mb-8">
                 <div class="flex items-center justify-between">
@@ -25,52 +25,68 @@
                 <form action="{{ route('menu.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Nama menu</label>
-                        <input type="text" name="nama" class="mt-1 block w-full border-gray-300 rounded-md" required />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nama menu</label>
+                        <input type="text" name="nama" value="{{ old('nama') }}"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1" required />
                         @error('nama')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Deskripsi</label>
-                        <textarea name="deskripsi" id="editor" rows="5" class="mt-1 block w-full border-gray-300 rounded-md" required></textarea>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
+                        <textarea name="deskripsi" id="editor" rows="5"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">{{ old('deskripsi') }}</textarea>
                         @error('deskripsi')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Diskon</label>
-                        <input type="text" name="diskon" class="mt-1 block w-full border-gray-300 rounded-md" required />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Diskon (%)</label>
+                        <input type="number" name="diskon" value="{{ old('diskon', 0) }}" min="0" max="100"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                         @error('diskon')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Kategori</label>
-                        <input type="text" name="kategori" class="mt-1 block w-full border-gray-300 rounded-md" required />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
+                        <select name="kategori"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
+                            <option value="Menu Baru" {{ old('kategori') == 'Menu Baru' ? 'selected' : '' }}>Menu Baru</option>
+                            <option value="Paket Hemat" {{ old('kategori') == 'Paket Hemat' ? 'selected' : '' }}>Paket Hemat</option>
+                            <option value="Makanan" {{ old('kategori') == 'Makanan' ? 'selected' : '' }}>Makanan</option>
+                            <option value="Minuman" {{ old('kategori') == 'Minuman' ? 'selected' : '' }}>Minuman</option>
+                            <option value="Snack" {{ old('kategori') == 'Snack' ? 'selected' : '' }}>Snack</option>
+                        </select>
                         @error('kategori')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Stok</label>
-                        <input type="text" name="stok" class="mt-1 block w-full border-gray-300 rounded-md" required />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
+                        <input type="number" name="stok" value="{{ old('stok', 0) }}" min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                         @error('stok')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Harga</label>
-                        <input type="text" name="harga" class="mt-1 block w-full border-gray-300 rounded-md" required />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">Rp</span>
+                            <input type="number" name="harga" value="{{ old('harga', 0) }}" min="0"
+                                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
+                        </div>
                         @error('harga')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
                     <div class="mb-4">
-                        <label class="block text-sm font-medium">Gambar</label>
-                        <input type="file" name="gambar" class="mt-1 block w-full" accept="image/*" />
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Gambar</label>
+                        <input type="file" name="gambar" accept="image/*"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1 text-sm" />
                         @error('gambar')
-                        <span class="text-red-700  py-2 rounded">{{ $message }}</span>
+                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -108,7 +124,7 @@
                     .then(editor => {
                         editor.model.document.on('change:data', () => {
                             // Update the textarea value when the content changes
-                            document.querySelector('textarea[name="isi_menu"]').value = editor.getData();
+                            document.querySelector('textarea[name="deskripsi"]').value = editor.getData();
                         });
                     })
                     .catch(error => {
