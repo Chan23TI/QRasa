@@ -13,6 +13,7 @@
             Tambah Kontak
         </a> <!-- Tombol untuk menambah review --> --}}
 
+
         @if ($contact->count() > 0)
             {{-- Akses data pertama untuk ID --}}
             <a href="{{ route('contact.edit', $contact->first()->id) }}" class="inline-block bg-red-600 text-white px-4 py-2 rounded mb-4">Edit Kontak</a>
