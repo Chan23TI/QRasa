@@ -4,6 +4,8 @@ namespace App\View\Components;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Menu;
 
 class AppLayout extends Component
 {
@@ -12,6 +14,14 @@ class AppLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.app');
+        $user = Auth::user();
+        $lowStockMenus = collect(); // Default to empty collection
+
+        if ($user) {
+            // Only fetch low stock menus if the user is authenticated and has menus
+            $lowStockMenus = $user->menus()->where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+        }
+
+        return view('layouts.app', compact('lowStockMenus'));
     }
 }
