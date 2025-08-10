@@ -11,8 +11,8 @@ class ABC extends Model
    protected $table = 'ABC';
     protected $fillable = [
         'isi',
-        'gambar1',
-        'gambar2',
+        'judul',
+        'gambar',
 
     ];
 }

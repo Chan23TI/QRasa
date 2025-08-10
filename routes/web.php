@@ -10,11 +10,22 @@ use App\Http\Controllers\PesanController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserController;
 use App\Models\banner;
+use App\Models\Contact;
 
+
+// Route::get('/', function () {
+//     return view('welcome');
+// });
+
+use App\Models\ABC;
 
 Route::get('/', function () {
-    return view('welcome');
+    $ABC = ABC::first();
+    $contact = Contact::first();
+    return view('welcome', compact('ABC', 'contact'));
 });
+
+
 
 Route::get('/menus', [MenuController::class, 'show'])->name('menu.show');
 
