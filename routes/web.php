@@ -36,6 +36,8 @@ Route::get('/pesan/summary/{ids}', [PesanController::class, 'multiSummary'])->na
 Route::get('/pesan/{pesan}/summary', [PesanController::class, 'show'])->name('pesan.summary');
 
 Route::patch('/pesan/{pesan}/update-status', [PesanController::class, 'updateStatus'])->name('pesan.updateStatus');
+Route::patch('/pesan/{pesan}/update-status-pembayaran', [PesanController::class, 'updateStatusPembayaran'])->name('pesan.updateStatusPembayaran');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

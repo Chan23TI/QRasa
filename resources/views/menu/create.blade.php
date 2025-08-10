@@ -20,6 +20,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Form Card -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden max-w-4xl">
                 <form action="{{ route('menu.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
@@ -32,6 +33,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Deskripsi</label>
                         <textarea name="deskripsi" id="editor" rows="5"
@@ -40,6 +42,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Diskon (%)</label>
                         <input type="number" name="diskon" value="{{ old('diskon', 0) }}" min="0" max="100"
@@ -48,6 +51,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Kategori</label>
                         <select name="kategori"
@@ -62,6 +66,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Stok</label>
                         <input type="number" name="stok" value="{{ old('stok', 0) }}" min="0"
@@ -70,6 +75,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Harga</label>
                         <div class="relative">
@@ -81,6 +87,7 @@
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
                         @enderror
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Gambar</label>
                         <input type="file" name="gambar" accept="image/*"
@@ -95,15 +102,14 @@
                             <label for="banner_id" class="block text-sm font-medium">Pilih Kantin</label>
                             <select name="banner_id" id="banner_id" class="form-select mt-1 block rounded">
                                 @foreach ($banners as $banner)
-                                <option value="{{ $banner->id }}">{{ $banner->nama }}</option>
+                                    <option value="{{ $banner->id }}" {{ old('banner_id') == $banner->id ? 'selected' : '' }}>
+                                        {{ $banner->nama }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
                     @else
-                        {{-- Hidden input for non-admin users --}}
-                        @if ($banners->isNotEmpty())
-                            <input type="hidden" name="banner_id" value="{{ $banners->first()->id }}">
-                        @endif
+                        <input type="hidden" name="banner_id" value="{{ $banners->first()->id ?? '' }}">
                     @endif
 
                     <div class="flex justify-end space-x-3 pt-6">
@@ -118,17 +124,17 @@
                     </div>
                 </form>
             </div>
+
             <script>
-                ClassicEditor
-                    .create(document.querySelector('#editor'))
-                    .then(editor => {
-                        editor.model.document.on('change:data', () => {
-                            // Update the textarea value when the content changes
-                            document.querySelector('textarea[name="deskripsi"]').value = editor.getData();
+                document.addEventListener("DOMContentLoaded", function () {
+                    ClassicEditor
+                        .create(document.querySelector('#editor'))
+                        .catch(error => {
+                            console.error(error);
                         });
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
+                });
             </script>
+        </main>
+    </div>
 </x-app-layout>
+
