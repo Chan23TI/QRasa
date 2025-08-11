@@ -85,8 +85,18 @@
                                         <div class="text-sm text-gray-500">{{ $user->email }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ $user->role === 'admin' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800' }}">
+                                        @php
+                                            $roleColors = [
+                                                'admin'    => 'bg-red-100 text-red-800',
+                                                'guest'    => 'bg-gray-100 text-gray-800',
+                                                'kasir'    => 'bg-blue-100 text-blue-800',
+                                                'chef'     => 'bg-green-100 text-green-800',
+                                                'waitress' => 'bg-yellow-100 text-yellow-800',
+                                                'stok'     => 'bg-purple-100 text-purple-800',
+                                            ];
+                                            $colorClass = $roleColors[$user->role] ?? 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $colorClass }}">
                                             {{ ucfirst($user->role) }}
                                         </span>
                                     </td>
@@ -99,7 +109,7 @@
                                             <form action="{{ route('user.destroy', $user->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-800 ml-2oke  inline-flex items-center px-3 py-2 transition-colors duration-150"
+                                                <button type="submit" class="text-red-600 hover:text-red-800 ml-2 inline-flex items-center px-3 py-2 transition-colors duration-150"
                                                     onclick="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
                                                     Hapus
                                                 </button>
@@ -121,30 +131,20 @@
 
     <script>
         function searchTable() {
-            const searchInput = document.getElementById('searchInput');
-            const filter = searchInput.value.toLowerCase();
-            const table = document.querySelector('table');
-            const rows = table.getElementsByTagName('tr');
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
 
-            for (let i = 1; i < rows.length; i++) {
-                const nameCell = rows[i].getElementsByTagName('td')[0];
-                const emailCell = rows[i].getElementsByTagName('td')[1];
-                const roleCell = rows[i].getElementsByTagName('td')[2];
+            rows.forEach(row => {
+                const name = row.cells[1]?.textContent.toLowerCase() || '';
+                const email = row.cells[2]?.textContent.toLowerCase() || '';
+                const role = row.cells[3]?.textContent.toLowerCase() || '';
 
-                if (nameCell && emailCell && roleCell) {
-                    const name = nameCell.textContent || nameCell.innerText;
-                    const email = emailCell.textContent || emailCell.innerText;
-                    const role = roleCell.textContent || roleCell.innerText;
-
-                    if (name.toLowerCase().indexOf(filter) > -1 ||
-                        email.toLowerCase().indexOf(filter) > -1 ||
-                        role.toLowerCase().indexOf(filter) > -1) {
-                        rows[i].style.display = '';
-                    } else {
-                        rows[i].style.display = 'none';
-                    }
+                if (name.includes(searchInput) || email.includes(searchInput) || role.includes(searchInput)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
                 }
-            }
+            });
         }
     </script>
 </x-app-layout>
