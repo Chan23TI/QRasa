@@ -59,58 +59,59 @@ class MenuController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $this->authorize('create', Menu::class);
+{
+    $this->authorize('create', Menu::class);
+    $user = Auth::user();
 
-        $user = Auth::user();
+    $rules = [
+        'nama'      => 'required|string|max:255',
+        'harga'     => 'required|numeric|min:0',
+        'stok'      => 'required|integer|min:0',
+        'diskon'    => 'nullable|integer|min:0|max:100',
+        'kategori'  => 'required|string',
+        'deskripsi' => 'required|string',
+        'gambar'    => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
+    ];
 
-        $rules = [
-            'nama'      => 'required|string|max:255',
-            'harga'     => 'required|numeric',
-            'stok'      => 'required|numeric',
-            'diskon'    => 'nullable|numeric',
-            'kategori'  => 'required|string',
-            'deskripsi' => 'required|string',
-            'gambar'    => 'nullable|image|mimes:jpeg,png,jpg,svg,webp|max:3048',
-        ];
-
-        if ($user->role === 'admin') {
-            $rules['banner_id'] = 'required|exists:banners,id';
-        } else {
-            // For non-admin, banner_id will be set automatically
-            $rules['banner_id'] = 'nullable'; // Still allow it in validation but it will be overridden
-        }
-
-        $validated = $request->validate($rules);
-
-        $menu            = new Menu();
-        $menu->nama      = $validated['nama'];
-        $menu->harga     = $validated['harga'];
-        $menu->deskripsi = $validated['deskripsi'];
-        $menu->stok      = $validated['stok'];
-        $menu->diskon    = $validated['diskon'];
-        $menu->kategori  = $validated['kategori'];
-        $menu->user_id = $user->id;
-
-        if ($user->role !== 'admin') {
-            $userBanner = $user->banners()->first();
-            if ($userBanner) {
-                $menu->banner_id = $userBanner->id;
-            } else {
-                return redirect()->back()->withErrors(['banner' => 'Anda harus memiliki setidaknya satu banner untuk menambahkan menu.']);
-            }
-        } else {
-            $menu->banner_id = $validated['banner_id'];
-        }
-
-        if ($request->hasFile('gambar')) {
-            $menu->gambar = $request->file('gambar')->store('images', 'public');
-        }
-
-        $menu->save();
-        return redirect()->route('menu.index', ['banner_id' => $menu->banner_id])
-            ->with('success', 'Menu berhasil ditambahkan!');
+    if ($user->role === 'admin') {
+        $rules['banner_id'] = 'required|exists:banners,id';
     }
+
+    $validated = $request->validate($rules);
+
+    $menu = new Menu();
+    $menu->nama      = $validated['nama'];
+    $menu->harga     = $validated['harga'];
+    $menu->deskripsi = strip_tags($validated['deskripsi']);
+    $menu->stok      = $validated['stok'];
+    $menu->diskon    = $validated['diskon'] ?? 0;
+    $menu->kategori  = $validated['kategori'];
+    $menu->user_id   = $user->id;
+
+    if ($user->role !== 'admin') {
+        $userBanner = $user->banners()->first();
+        if ($userBanner) {
+            $menu->banner_id = $userBanner->id;
+        } else {
+            return redirect()->back()
+                ->withErrors(['banner' => 'Anda harus memiliki setidaknya satu banner untuk menambahkan menu.'])
+                ->withInput();
+        }
+    } else {
+        $menu->banner_id = $validated['banner_id'];
+    }
+
+    if ($request->hasFile('gambar')) {
+        $menu->gambar = $request->file('gambar')->store('images', 'public');
+    }
+
+    $menu->save();
+
+    return redirect()
+        ->route('menu.index', ['banner_id' => $menu->banner_id])
+        ->with('success', 'Menu berhasil ditambahkan!');
+}
+
 
     public function edit(Menu $menu)
     {
