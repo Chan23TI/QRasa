@@ -11,6 +11,7 @@ class Pesan extends Model
         'user_id',
         'status',
         'payment_method',
+        'status_pembayaran',
         'meja_id',
     ];
 

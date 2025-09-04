@@ -102,6 +102,7 @@ class PesanController extends Controller
             $pesan->meja_id = $request->meja_id;
             $pesan->total = $total;
             $pesan->status = 'belum diantar';
+            $pesan->status_pembayaran = 'belum dibayar'; // Tambahan baru
             $pesan->payment_method = $request->payment_method;
             $pesan->banner_id = $request->banner_id;
             $pesan->save();
@@ -137,7 +138,6 @@ class PesanController extends Controller
                     'error_details' => [
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
-                        // 'trace' => $e->getTraceAsString() // Uncomment for more detailed debugging, but be careful with sensitive info
                     ]
                 ], 500);
             }
@@ -175,6 +175,13 @@ class PesanController extends Controller
     {
         $pesan->update(['status' => 'sudah diantar']);
         return redirect()->route('pesan.index')->with('success', 'Status pesanan berhasil diperbarui!');
+    }
+
+    // Tambahan baru
+    public function updateStatusPembayaran(Pesan $pesan)
+    {
+        $pesan->update(['status_pembayaran' => 'sudah dibayar']);
+        return redirect()->route('pesan.index')->with('success', 'Status pembayaran berhasil diperbarui!');
     }
 
     /**

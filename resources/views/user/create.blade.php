@@ -19,7 +19,9 @@
                         </a>
                     </div>
                 </div>
-            </div>            <!-- Form Card -->
+            </div>
+
+            <!-- Form Card -->
             <div class="bg-white rounded-xl shadow-sm overflow-hidden max-w-4xl">
                 <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data" class="p-6">
                     @csrf
@@ -89,6 +91,10 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                             <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="guest" {{ old('role') == 'guest' ? 'selected' : '' }}>Guest</option>
+                            <option value="kasir" {{ old('role') == 'kasir' ? 'selected' : '' }}>Kasir</option>
+                            <option value="chef" {{ old('role') == 'chef' ? 'selected' : '' }}>Chef</option>
+                            <option value="waitress" {{ old('role') == 'waitress' ? 'selected' : '' }}>Waitress</option>
+                            <option value="stok" {{ old('role') == 'stok' ? 'selected' : '' }}>Stok</option>
                         </select>
                         @error('role')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
