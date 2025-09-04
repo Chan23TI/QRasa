@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ABCController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MenuController;
@@ -13,22 +12,11 @@ use App\Models\banner;
 use App\Models\Contact;
 
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-use App\Models\ABC;
-
 Route::get('/', function () {
-    $ABC = ABC::first();
-    $contact = Contact::first();
-    return view('welcome', compact('ABC', 'contact'));
+    return view('welcome');
 });
 
-
-
 Route::get('/menus', [MenuController::class, 'show'])->name('menu.show');
-
 
 // Pesan Routes
 Route::post('/pesan', [PesanController::class, 'store'])->name('pesan.store');
@@ -48,7 +36,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('ABC', ABCController::class);
     Route::resource('contact', ContactController::class);
 
     Route::resource('menu', MenuController::class)->names([
@@ -64,7 +51,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
         Route::resource('meja', \App\Http\Controllers\MejaController::class);
     });
-
     Route::get('/pesan', [PesanController::class, 'index'])->name('pesan.index');
 });
 
