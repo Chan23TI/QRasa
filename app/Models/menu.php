@@ -15,16 +15,6 @@ class menu extends Model
         'gambar',
     ];
 
-    public function banner()
-    {
-        return $this->belongsTo(Banner::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-
     public function pesans()
     {
         return $this->belongsToMany(Pesan::class)->withPivot('quantity');

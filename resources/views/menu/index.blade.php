@@ -22,6 +22,18 @@
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
                     </div>
+                    <div>
+                        <label for="kategori_filter" class="sr-only">Filter by Kategori</label>
+                        <select id="kategori_filter" name="kategori_filter" onchange="window.location.href=this.value;"
+                            class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-hijau1 focus:border-hijau1 sm:text-sm rounded-lg">
+                            <option value="{{ route('menu.index') }}">Semua Kategori</option>
+                            @foreach ($kategori as $kat)
+                                <option value="{{ route('menu.index', ['kategori' => $kat]) }}" @if(request('kategori') == $kat) selected @endif>
+                                    {{ $kat }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <a href="{{ route('menu.create') }}"
                     class="inline-flex items-center px-4 py-2 bg-hijau1 text-white rounded-lg hover:bg-hijau1/90 transition-colors duration-150">

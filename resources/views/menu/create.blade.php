@@ -97,20 +97,7 @@
                         @enderror
                     </div>
 
-                    @if (Auth::user()->role === 'admin')
-                        <div class="mb-4">
-                            <label for="banner_id" class="block text-sm font-medium">Pilih Kantin</label>
-                            <select name="banner_id" id="banner_id" class="form-select mt-1 block rounded">
-                                @foreach ($banners as $banner)
-                                    <option value="{{ $banner->id }}" {{ old('banner_id') == $banner->id ? 'selected' : '' }}>
-                                        {{ $banner->nama }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @else
-                        <input type="hidden" name="banner_id" value="{{ $banners->first()->id ?? '' }}">
-                    @endif
+                    
 
                     <div class="flex justify-end space-x-3 pt-6">
                         <a href="{{ route('menu.index') }}"

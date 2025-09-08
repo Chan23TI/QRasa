@@ -117,23 +117,7 @@
                         </div>
                     </div>
 
-                    <!-- Banner Selection -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Pilih Kantin
-                        </label>
-                        <select name="banner_id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
-                            @foreach ($banners as $banner)
-                                <option value="{{ $banner->id }}" {{ old('banner_id', $menu->banner_id) == $banner->id ? 'selected' : '' }}>
-                                    {{ $banner->nama }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('banner_id')
-                            <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                        @enderror
-                    </div>
+                    
 
                     <!-- Submit Buttons -->
                     <div class="flex justify-end space-x-3 pt-6">

@@ -39,16 +39,6 @@
                             @endforeach
                         </select>
                     </div>
-                    <button type="submit"
-                        class="mt-5 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-hijau1 hover:bg-hijau1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Filter
-                    </button>
-                    @if (request()->has('status') || request()->has('payment_method'))
-                        <a href="{{ route('pesan.index') }}"
-                            class="mt-5 inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            Reset Filter
-                        </a>
-                    @endif
                 </form>
             </div>
 
@@ -161,7 +151,12 @@
                                                         {{ $pesan->created_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap space-y-2">
-                                                        @if ($pesan->status === 'belum diantar')
+                                                        @php
+                                                            $userRole = auth()->user()->role;
+                                                        @endphp
+
+                                                        {{-- Role waiter dan chef hanya bisa menekan tombol sudah diantar --}}
+                                                        @if (($userRole === 'waiter' || $userRole === 'chef') && $pesan->status === 'belum diantar')
                                                             <form action="{{ route('pesan.updateStatus', $pesan) }}"
                                                                 method="POST">
                                                                 @csrf
@@ -173,26 +168,56 @@
                                                             </form>
                                                         @endif
 
-                                                        @if ($pesan->status_pembayaran === 'belum dibayar' || $pesan->status_pembayaran === null)
-                                                            <form action="{{ route('pesan.updateStatusPembayaran', $pesan) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('PATCH')
-                                                                <button type="submit"
-                                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
-                                                                    Sudah Dibayar
-                                                                </button>
-                                                            </form>
-                                                        @elseif ($pesan->status_pembayaran === 'pending')
-                                                            <form action="{{ route('pesan.updateStatusPembayaran', $pesan) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('PATCH')
-                                                                <button type="submit"
-                                                                    class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded w-full">
-                                                                    Tandai Lunas
-                                                                </button>
-                                                            </form>
+                                                        {{-- Role cashier hanya bisa menekan tombol sudah dibayar --}}
+                                                        @if ($userRole === 'cashier')
+                                                            @if ($pesan->status_pembayaran === 'belum dibayar' || $pesan->status_pembayaran === null)
+                                                                <form action="{{ route('pesan.updateStatusPembayaran', $pesan) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="submit"
+                                                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+                                                                        Sudah Dibayar
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+                                                        @endif
+
+                                                        {{-- Role admin bisa menekan semua tombol --}}
+                                                        @if ($userRole === 'admin')
+                                                            @if ($pesan->status === 'belum diantar')
+                                                                <form action="{{ route('pesan.updateStatus', $pesan) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="submit"
+                                                                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded w-full">
+                                                                        Sudah Diantar
+                                                                    </button>
+                                                                </form>
+                                                            @endif
+
+                                                            @if ($pesan->status_pembayaran === 'belum dibayar' || $pesan->status_pembayaran === null)
+                                                                <form action="{{ route('pesan.updateStatusPembayaran', $pesan) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="submit"
+                                                                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
+                                                                        Sudah Dibayar
+                                                                    </button>
+                                                                </form>
+                                                            @elseif ($pesan->status_pembayaran === 'pending')
+                                                                <form action="{{ route('pesan.updateStatusPembayaran', $pesan) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    @method('PATCH')
+                                                                    <button type="submit"
+                                                                        class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded w-full">
+                                                                        Tandai Lunas
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                                         @endif
                                                     </td>
                                                 </tr>

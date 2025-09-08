@@ -25,7 +25,7 @@
             <div class="flex lg:flex-1 lg:justify-end">
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/home') }}" class="text-sm font-semibold leading-6 text-gray-900">Home <span aria-hidden="true">&rarr;</span></a>
+                        <a href="{{ url('/menu') }}" class="text-sm font-semibold leading-6 text-gray-900">Home <span aria-hidden="true">&rarr;</span></a>
                     @else
                         <a href="{{ route('login') }}" class="text-sm font-semibold leading-6 text-gray-900">Log in <span aria-hidden="true">&rarr;</span></a>
                     @endauth

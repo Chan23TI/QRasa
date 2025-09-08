@@ -91,11 +91,9 @@
                         <select name="role"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hijau1 focus:border-hijau1">
                             <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
-                            <option value="guest" {{ old('role', $user->role) == 'guest' ? 'selected' : '' }}>Guest</option>
-                            <option value="kasir" {{ old('role', $user->role) == 'kasir' ? 'selected' : '' }}>Kasir</option>
                             <option value="chef" {{ old('role', $user->role) == 'chef' ? 'selected' : '' }}>Chef</option>
-                            <option value="waitress" {{ old('role', $user->role) == 'waitress' ? 'selected' : '' }}>Waitress</option>
-                            <option value="stok" {{ old('role', $user->role) == 'stok' ? 'selected' : '' }}>Stok</option>
+                            <option value="waiter" {{ old('role', $user->role) == 'waiter' ? 'selected' : '' }}>Waiter</option>
+                            <option value="cashier" {{ old('role', $user->role) == 'cashier' ? 'selected' : '' }}>Cashier</option>
                         </select>
                         @error('role')
                             <p class="mt-1 text-sm text-red-500">{{ $message }}</p>

@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-hijau1 border-b border-gray-100">
+<nav x-data="{ open: false }" class="bg-hijau1 border-gray-100">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-end h-16">
@@ -8,7 +8,11 @@
             <div x-data="{ lowStockOpen: false }" x-init="lowStockOpen = false" class="relative hidden sm:flex sm:items-center mr-4">
                 <button @click="lowStockOpen = ! lowStockOpen" class="relative p-2 rounded-full text-putih hover:bg-hijau1/80 focus:ring-putih transition-all duration-200">
                     <i class="fas fa-bell text-xl"></i>
-                    @if ($lowStockMenus->count() > 0)
+                    @if (Auth::user()->role === 'admin' && isset($adminLowStockMenus) && $adminLowStockMenus->count() > 0)
+                        <span class="absolute top-2 right-1 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ring-2 ring-hijau1">
+                            {{ $adminLowStockMenus->count() }}
+                        </span>
+                    @elseif (isset($lowStockMenus) && $lowStockMenus->count() > 0)
                         <span class="absolute top-2 right-1 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ring-2 ring-hijau1">
                             {{ $lowStockMenus->count() }}
                         </span>
@@ -21,16 +25,29 @@
                         <div class="block px-4 py-2 text-xs text-gray-500 font-semibold border-b border-gray-100">
                             Peringatan Stok Rendah
                         </div>
-                        @forelse ($lowStockMenus as $menu)
-                            <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150">
-                                <span>{{ $menu->nama }}</span>
-                                <span class="font-medium text-red-600">Stok: {{ $menu->stok }}</span>
-                            </div>
-                        @empty
-                            <div class="block px-4 py-2 text-sm text-gray-700">
-                                Tidak ada menu dengan stok rendah.
-                            </div>
-                        @endforelse
+                        @if (Auth::user()->role === 'admin' && isset($adminLowStockMenus))
+                            @forelse ($adminLowStockMenus as $menu)
+                                <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150">
+                                    <span>{{ $menu->nama }}</span>
+                                    <span class="font-medium text-red-600">Stok: {{ $menu->stok }}</span>
+                                </div>
+                            @empty
+                                <div class="block px-4 py-2 text-sm text-gray-700">
+                                    Tidak ada menu dengan stok rendah.
+                                </div>
+                            @endforelse
+                        @else
+                            @forelse ($lowStockMenus as $menu)
+                                <div class="flex justify-between items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150">
+                                    <span>{{ $menu->nama }}</span>
+                                    <span class="font-medium text-red-600">Stok: {{ $menu->stok }}</span>
+                                </div>
+                            @empty
+                                <div class="block px-4 py-2 text-sm text-gray-700">
+                                    Tidak ada menu dengan stok rendah.
+                                </div>
+                            @endforelse
+                        @endif
                     </div>
                 </div>
             </div>
@@ -110,9 +127,7 @@
             <x-responsive-nav-link :href="route('meja.index')" :active="request()->routeIs('meja.index')">
                 {{ __('Meja') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('banner.index')" :active="request()->routeIs('banner.index')">
-                {{ __('Banner') }}
-            </x-responsive-nav-link>
+
             @if (Auth::user()->role == 'admin')
             <x-responsive-nav-link :href="route('user.index')" :active="request()->routeIs('user.index')">
                 {{ __('User') }}

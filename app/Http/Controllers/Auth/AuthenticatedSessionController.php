@@ -28,7 +28,15 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('menu.index', absolute: false));
+        // Redirect user based on role
+        $user = Auth::user();
+        if ($user->role === 'admin') {
+            return redirect()->intended(route('menu.index', absolute: false));
+        } elseif ($user->role === 'chef') {
+            return redirect()->intended(route('pesan.index', absolute: false));
+        } else {
+            return redirect()->intended(route('pesan.index', absolute: false));
+        }
     }
 
     /**

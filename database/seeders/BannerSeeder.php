@@ -12,8 +12,7 @@ class BannerSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Banner::create([
-            'nama' => 'Kantin Utama',
-        ]);
+        // Banner model has been removed, so this seeder is now empty
+        // Future seeders can be added here if needed
     }
 }

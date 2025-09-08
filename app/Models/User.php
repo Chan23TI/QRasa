@@ -48,16 +48,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function menus()
-    {
-        return $this->hasMany(Menu::class);
-    }
-
-    public function banners()
-    {
-        return $this->hasMany(Banner::class);
-    }
-
     public function pesans()
     {
         return $this->hasMany(Pesan::class);

@@ -5,13 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $selectedBanner ? $selectedBanner->nama : 'Menu Warung' }}</title>
+    <title>Menu - {{ $selectedKategori ?? 'Semua Kategori' }}</title>
     <meta name="description" content="Menu makanan online">
-    @vite(['resources/css/app.css'])
+    @vite(['resources/css/app.css']) 
 
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="icon" type="image/png" href="{{ asset('img/Logo/LogoKantin.png') }} " loading="lazy">
+    <link rel="icon" type="image/png" href="{{ asset('img/Logo/LogoKantin.png') }}" loading="lazy">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -62,7 +62,7 @@
                     </div>
                     <div class="flex flex-col items-center">
                         <h1 class="text-lg md:text-xl font-bold text-putih truncate max-w-[200px] md:max-w-none"
-                            x-text="selectedBanner ? selectedBanner.nama : 'Semua Kantin'">
+                            x-text="selectedKategori ? selectedKategori : 'Semua Kategori'">
                         </h1>
 
                         <div x-show="mejaId" class="bg-orenTua/80 rounded-full px-3 py-0.5 mt-1">
@@ -93,25 +93,23 @@
             <div class="container mx-auto">
                 <div class="overflow-x-auto scrollbar-hide">
                     <div class="flex space-x-2 p-4 whitespace-nowrap min-w-full">
-                        <a href="#" @click.prevent="filterByCategory(null)"
+                        <a href="#" @click.prevent="filterByKategori(null)"
                             :class="{
-                                'bg-hijau1 text-white shadow-md': selectedBannerId === null,
-                                'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedBannerId !== null
+                                'bg-hijau1 text-white shadow-md': selectedKategori === null,
+                                'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedKategori !== null
                             }"
                             class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                            <i class="fas fa-home mr-2"></i>
-                            <span>Semua Kantin</span>
+                            <i class="fas fa-utensils mr-2"></i>
+                            <span>Semua Kategori</span>
                         </a>
-                        @foreach ($banners as $banner)
-                            <a href="#" @click.prevent="filterByCategory({{ $banner->id }})"
+                        @foreach ($kategori as $kat)
+                            <a href="#" @click.prevent="filterByKategori('{{ $kat }}')"
                                 :class="{
-                                    'bg-hijau1 text-white shadow-md': selectedBannerId === {{ $banner->id }},
-                                    'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedBannerId !==
-                                        {{ $banner->id }}
+                                    'bg-hijau1 text-white shadow-md': selectedKategori === '{{ $kat }}',
+                                    'bg-gray-100 text-gray-700 hover:bg-gray-200': selectedKategori !== '{{ $kat }}'
                                 }"
                                 class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 transform hover:scale-105">
-                                <i class="fas fa-store mr-2"></i>
-                                <span>{{ $banner->nama }}</span>
+                                <span>{{ $kat }}</span>
                             </a>
                         @endforeach
                     </div>
@@ -122,28 +120,8 @@
         <div class="flex-1">
             <!-- Main Content -->
             <main class="flex-1 p-4 ">
-                <!-- Banner -->
-                <div class="container mx-auto px-4 py-6">
-                    <div x-show="selectedBanner" class="max-w-4xl mx-auto">
-                        <div class="relative rounded-xl overflow-hidden shadow-lg aspect-w-16 aspect-h-9">
-                            <img x-bind:src="selectedBanner ? '{{ asset('storage/') }}/' + selectedBanner.gambar : ''"
-                                x-bind:alt="selectedBanner ? selectedBanner.nama : ''" loading="lazy"
-                                class="w-full h-full object-cover">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                            <div class="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-                                <h2 class="text-white text-xl md:text-2xl font-bold"
-                                    x-text="selectedBanner ? selectedBanner.nama : ''">
-                                </h2>
-                                <p x-show="selectedBanner && selectedBanner.deskripsi"
-                                    class="text-white/90 text-sm md:text-base mt-2"
-                                    x-text="selectedBanner ? selectedBanner.deskripsi : ''"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Search -->
-                <div class="container mx-auto px-4 mb-8">
+                <div class="container mx-auto px-4 my-8">
                     <div class="max-w-2xl mx-auto relative">
                         <input type="text" x-model="searchQuery" placeholder="Cari menu favoritmu..."
                             class="w-full p-4 pl-12 text-base border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-hijau1 focus:border-hijau1 transition-all duration-200 shadow-sm">
@@ -157,97 +135,8 @@
                         </div>
                     </div>
                 </div>
-            <h2 class="text-2xl font-bold mb-6" x-show="filteredPaketItems().length > 0">Paket Hemat</h2>
-                <!-- Menu List Paket Hemat -->
-                <div x-show="filteredPaketItems().length > 0"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
-                    <template x-for="item in filteredPaketItems()" :key="item.id">
-                        <div
-                            class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                            <!-- Image Section -->
-                            <div class="relative aspect-square w-full overflow-hidden">
-                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover"
-                                    loading="lazy">
-                                <div x-show="item.discount > 0"
-                                    class="absolute top-2 right-2 bg-orenTua text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
-                                    <span x-text="item.discount + '%'"></span>
-                                </div>
-                            </div>
 
-                            <!-- Content Section -->
-                            <div class="p-3">
-                                <h3 class="font-medium text-gray-800 text-sm sm:text-base mb-1 truncate"
-                                    x-text="item.name">
-                                </h3>
-                                <div class="flex flex-col space-y-1 mb-2">
-                                    <p class="text-sm sm:text-base font-bold text-hijau1"
-                                        x-text="formatPrice(item.price - (item.price * item.discount / 100))">
-                                    </p>
-                                    <template x-if="item.discount > 0">
-                                        <p class="text-xs text-gray-400 line-through" x-text="formatPrice(item.price)">
-                                        </p>
-                                    </template>
-                                </div>
-
-                                <!-- Add to Cart Button -->
-                                <button @click="addToCart(item)" :disabled="item.stok <= 0"
-                                    :class="{ 'opacity-50 cursor-not-allowed': item.stok <= 0 }"
-                                    class="w-full px-3 py-1.5 bg-hijau1 text-white text-sm rounded-lg hover:bg-hijau1/90 transition-colors duration-200 flex items-center justify-center space-x-1 group">
-                                    <i class="fas fa-plus text-xs transition-transform duration-300"></i>
-                                    <span x-text="item.stok <= 0 ? 'Habis' : 'Tambah'"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-6 " x-show="filteredMenuBaruItems().length > 0">Menu Baru</h2>
-
-                <!-- Menu Baru List -->
-                <div x-show="filteredMenuBaruItems().length > 0"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
-                    <template x-for="item in filteredMenuBaruItems()" :key="item.id">
-                        <div
-                            class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                            <!-- Image Section -->
-                            <div class="relative aspect-square w-full overflow-hidden">
-                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover"
-                                    loading="lazy">
-                                <div x-show="item.discount > 0"
-                                    class="absolute top-2 right-2 bg-orenTua text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
-                                    <span x-text="item.discount + '%'"></span>
-                                </div>
-                            </div>
-
-                            <!-- Content Section -->
-                            <div class="p-3">
-                                <h3 class="font-medium text-gray-800 text-sm sm:text-base mb-1 truncate"
-                                    x-text="item.name">
-                                </h3>
-                                <div class="flex flex-col space-y-1 mb-2">
-                                    <p class="text-sm sm:text-base font-bold text-hijau1"
-                                        x-text="formatPrice(item.price - (item.price * item.discount / 100))">
-                                    </p>
-                                    <template x-if="item.discount > 0">
-                                        <p class="text-xs text-gray-400 line-through" x-text="formatPrice(item.price)"></p>
-                                    </template>
-                                </div>
-
-                                <!-- Add to Cart Button -->
-                                <button @click="addToCart(item)" :disabled="item.stok <= 0"
-                                    :class="{ 'opacity-50 cursor-not-allowed': item.stok <= 0 }"
-                                    class="w-full px-3 py-1.5 bg-hijau1 text-white text-sm rounded-lg hover:bg-hijau1/90 transition-colors duration-200 flex items-center justify-center space-x-1 group">
-                                    <i class="fas fa-plus text-xs transition-transform duration-300"></i>
-                                    <span x-text="item.stok <= 0 ? 'Habis' : 'Tambah'"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-6" x-show="filteredMenuItems().length > 0">Makanan</h2>
-
-                <!-- Menu List -->
+                <!-- Menu Grid -->
                 <div x-show="filteredMenuItems().length > 0"
                     class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
                     <template x-for="item in filteredMenuItems()" :key="item.id">
@@ -289,91 +178,11 @@
                     </template>
                 </div>
 
-                <h2 class="text-2xl font-bold mb-6" x-show="filteredDrinkItems().length > 0">Minuman</h2>
-
-                <!-- Menu List Minuman -->
-                <div x-show="filteredDrinkItems().length > 0"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
-                    <template x-for="item in filteredDrinkItems()" :key="item.id">
-                        <div
-                            class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                            <!-- Image Section -->
-                            <div class="relative aspect-square w-full overflow-hidden">
-                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover"
-                                    loading="lazy">
-                                <div x-show="item.discount > 0"
-                                    class="absolute top-2 right-2 bg-orenTua text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
-                                    <span x-text="item.discount + '%'"></span>
-                                </div>
-                            </div>
-
-                            <!-- Content Section -->
-                            <div class="p-3">
-                                <h3 class="font-medium text-gray-800 text-sm sm:text-base mb-1 truncate"
-                                    x-text="item.name">
-                                </h3>
-                                <div class="flex flex-col space-y-1 mb-2">
-                                    <p class="text-sm sm:text-base font-bold text-hijau1"
-                                        x-text="formatPrice(item.price - (item.price * item.discount / 100))">
-                                    </p>
-                                    <template x-if="item.discount > 0">
-                                        <p class="text-xs text-gray-400 line-through" x-text="formatPrice(item.price)"></p>
-                                    </template>
-                                </div>
-
-                                <!-- Add to Cart Button -->
-                                <button @click="addToCart(item)" :disabled="item.stok <= 0"
-                                    :class="{ 'opacity-50 cursor-not-allowed': item.stok <= 0 }"
-                                    class="w-full px-3 py-1.5 bg-hijau1 text-white text-sm rounded-lg hover:bg-hijau1/90 transition-colors duration-200 flex items-center justify-center space-x-1 group">
-                                    <i class="fas fa-plus text-xs transition-transform duration-300"></i>
-                                    <span x-text="item.stok <= 0 ? 'Habis' : 'Tambah'"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-6" x-show="filteredSnackItems().length > 0">Snack</h2>
-                <!-- Menu List Snack -->
-                <div x-show="filteredSnackItems().length > 0"
-                    class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-6">
-                    <template x-for="item in filteredSnackItems()" :key="item.id">
-                        <div
-                            class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
-                            <!-- Image Section -->
-                            <div class="relative aspect-square w-full overflow-hidden">
-                                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover"
-                                    loading="lazy">
-                                <div x-show="item.discount > 0"
-                                    class="absolute top-2 right-2 bg-orenTua text-white text-xs font-bold px-2 py-1 rounded-lg shadow-md">
-                                    <span x-text="item.discount + '%'"></span>
-                                </div>
-                            </div>
-
-                            <!-- Content Section -->
-                            <div class="p-3">
-                                <h3 class="font-medium text-gray-800 text-sm sm:text-base mb-1 truncate"
-                                    x-text="item.name">
-                                </h3>
-                                <div class="flex flex-col space-y-1 mb-2">
-                                    <p class="text-sm sm:text-base font-bold text-hijau1"
-                                        x-text="formatPrice(item.price - (item.price * item.discount / 100))">
-                                    </p>
-                                    <template x-if="item.discount > 0">
-                                        <p class="text-xs text-gray-400 line-through" x-text="formatPrice(item.price)"></p>
-                                    </template>
-                                </div>
-
-                                <!-- Add to Cart Button -->
-                                <button @click="addToCart(item)" :disabled="item.stok <= 0"
-                                    :class="{ 'opacity-50 cursor-not-allowed': item.stok <= 0 }"
-                                    class="w-full px-3 py-1.5 bg-hijau1 text-white text-sm rounded-lg hover:bg-hijau1/90 transition-colors duration-200 flex items-center justify-center space-x-1 group">
-                                    <i class="fas fa-plus text-xs transition-transform duration-300"></i>
-                                    <span x-text="item.stok <= 0 ? 'Habis' : 'Tambah'"></span>
-                                </button>
-                            </div>
-                        </div>
-                    </template>
+                 <!-- No Results Message -->
+                <div x-show="filteredMenuItems().length === 0" class="text-center py-16">
+                    <i class="fas fa-search text-4xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-semibold text-gray-700">Menu Tidak Ditemukan</h3>
+                    <p class="text-gray-500 mt-2">Coba kata kunci atau kategori lain.</p>
                 </div>
             </main>
 
@@ -484,15 +293,6 @@
             return {
                 cartOpen: false,
                 historyOpen: false,
-                banners: @json($banners),
-                stores: [...new Set(@json($banners).map(b => b.nama))].map((name, index) => ({
-                    id: index + 1,
-                    nama: name
-                })),
-                currentStore: {
-                    id: 1,
-                    nama: @json(optional($banners->first())->nama ?? 'Semua Kantin')
-                },
                 menuItems: {!! json_encode(
                     $menu->map(function ($item) {
                         return [
@@ -503,8 +303,7 @@
                             'discount' => $item->diskon ?? 0,
                             'image' => asset('storage/' . $item->gambar),
                             'stok' => $item->stok,
-                            'category' => $item->kategori ?? 'Makanan', // Menambahkan kategori
-                            'banner_id' => $item->banner_id, // Menambahkan banner_id
+                            'category' => $item->kategori ?? 'Lainnya',
                         ];
                     }),
                 ) !!},
@@ -513,8 +312,7 @@
                 mejaId: null,
                 mejaNumberInput: '',
                 showMejaInput: false,
-                selectedBannerId: {{ request('banner_id') ?? 'null' }},
-                selectedBanner: @json($selectedBanner),
+                selectedKategori: @json($selectedKategori ?? null),
                 historyPesanan: @json($historyPesanan),
                 init() {
                     const urlParams = new URLSearchParams(window.location.search);
@@ -528,7 +326,6 @@
                     if (this.mejaNumberInput && this.mejaNumberInput > 0) {
                         this.mejaId = this.mejaNumberInput;
                         this.showMejaInput = false;
-                        // Update URL with meja_id
                         const url = new URL(window.location.href);
                         url.searchParams.set('meja_id', this.mejaId);
                         window.history.pushState({}, '', url);
@@ -536,14 +333,11 @@
                         alert('Mohon masukkan nomor meja yang valid.');
                     }
                 },
-                changeStore(store) {
-                    this.currentStore = store;
-                },
-                async filterByCategory(bannerId) {
-                    this.selectedBannerId = bannerId;
+                async filterByKategori(kategori) {
+                    this.selectedKategori = kategori;
                     const url = new URL('{{ route('menu.show') }}');
-                    if (bannerId) {
-                        url.searchParams.set('banner_id', bannerId);
+                    if (kategori) {
+                        url.searchParams.set('kategori', kategori);
                     }
                     if (this.mejaId) {
                         url.searchParams.set('meja_id', this.mejaId);
@@ -556,9 +350,7 @@
                                 'Accept': 'application/json'
                             }
                         });
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                         const data = await response.json();
                         this.menuItems = data.menu.map(item => ({
                             id: item.id,
@@ -568,12 +360,9 @@
                             discount: item.diskon ?? 0,
                             image: `{{ asset('storage/') }}/${item.gambar}`,
                             stok: item.stok,
-                            category: item.kategori ?? 'Makanan',
-                            banner_id: item.banner_id,
+                            category: item.kategori ?? 'Lainnya',
                         }));
-                        // Update selectedBanner if needed, though it's mostly for initial load
-                        this.selectedBanner = data.selectedBanner; // If you want to update banner info on top
-                        window.history.pushState({}, '', url.toString()); // Update URL in browser history
+                        window.history.pushState({}, '', url.toString());
                     } catch (error) {
                         console.error('Error fetching menu items:', error);
                         alert('Gagal memuat menu. Silakan coba lagi.');
@@ -597,10 +386,7 @@
                         }
                         existing.quantity++;
                     } else {
-                        this.cart.push({
-                            ...item,
-                            quantity: 1
-                        });
+                        this.cart.push({ ...item, quantity: 1 });
                     }
                 },
                 removeFromCart(id) {
@@ -622,158 +408,67 @@
                 getTotalItems() {
                     return this.cart.reduce((t, i) => t + i.quantity, 0);
                 },
-                paymentMethod: '', // New property for payment method
-                // Perbaikan untuk fungsi checkout() di dalam script Alpine.js
+                paymentMethod: '',
                 checkout() {
                     if (this.cart.length === 0 || !this.paymentMethod) {
                         alert('Keranjang kosong atau metode pembayaran belum dipilih!');
                         return;
                     }
-
                     if (!this.mejaId) {
                         alert('Mohon masukkan nomor meja terlebih dahulu sebelum checkout.');
                         this.showMejaInput = true;
                         return;
                     }
 
-                    // Group cart items by banner_id
-                    const groupedCartItems = this.cart.reduce((acc, item) => {
-                        const bannerId = item.banner_id;
-                        if (!acc[bannerId]) {
-                            acc[bannerId] = {
-                                banner_id: bannerId,
-                                items: [],
-                                total: 0
-                            };
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                    const postData = {
+                        cartItems: this.cart.map(item => ({ id: item.id, quantity: item.quantity })),
+                        total: this.calculateTotal(),
+                        payment_method: this.paymentMethod,
+                        meja_id: this.mejaId,
+                    };
+
+                    fetch('{{ route('pesan.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(postData)
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || 'Server error'); });
                         }
-                        acc[bannerId].items.push({
-                            id: item.id,
-                            quantity: item.quantity
-                        });
-                        acc[bannerId].total += (item.price - (item.price * item.discount / 100)) * item.quantity;
-                        return acc;
-                    }, {});
-
-                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
-                        '{{ csrf_token() }}';
-
-                    const promises = Object.values(groupedCartItems).map(group => {
-                        const postData = {
-                            cartItems: group.items,
-                            total: group.total,
-                            payment_method: this.paymentMethod,
-                            meja_id: this.mejaId,
-                            banner_id: group.banner_id // Pass banner_id to backend
-                        };
-
-                        console.log('Mengirim data checkout untuk banner_id:', group.banner_id, postData);
-
-                        return fetch('{{ route('pesan.store') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json',
-                                    'X-CSRF-TOKEN': csrfToken,
-                                    'X-Requested-With': 'XMLHttpRequest'
-                                },
-                                body: JSON.stringify(postData)
-                            })
-                            .then(response => {
-                                if (response.status === 302 || response.status === 301) {
-                                    const redirectUrl = response.headers.get('Location') || '/login';
-                                    alert('Session expired atau perlu login. Mengalihkan ke halaman login...');
-                                    window.location.href = redirectUrl;
-                                    return Promise.reject('Redirect detected');
-                                }
-                                const contentType = response.headers.get('content-type');
-                                if (!contentType || !contentType.includes('application/json')) {
-                                    return response.text().then(text => {
-                                        throw new Error(
-                                            `Expected JSON but got ${contentType}. Response: ${text.substring(0, 100)}...`
-                                        );
-                                    });
-                                }
-                                if (!response.ok) {
-                                    return response.json().then(err => {
-                                        throw new Error(
-                                            `HTTP error! status: ${response.status}, message: ${err.message || JSON.stringify(err)}`
-                                        );
-                                    });
-                                }
-                                return response.json();
-                            });
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message || 'Pesanan berhasil dibuat!');
+                            this.cart = [];
+                            this.cartOpen = false;
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                            }
+                        } else {
+                            alert('Checkout gagal: ' + (data.message || 'Silakan coba lagi.'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error saat checkout:', error);
+                        alert('Terjadi kesalahan: ' + error.message);
                     });
-
-                    Promise.all(promises)
-                        .then(responses => {
-                            let allCreatedPesanIds = [];
-                            let allMessages = [];
-                            let hasError = false;
-
-                            responses.forEach(data => {
-                                if (data.success) {
-                                    allCreatedPesanIds = allCreatedPesanIds.concat(data.created_pesan_ids);
-                                    allMessages.push(data.message);
-                                } else {
-                                    hasError = true;
-                                    allMessages.push('Terjadi kesalahan: ' + (data.message ||
-                                        'Silakan coba lagi.'));
-                                }
-                            });
-
-                            if (hasError) {
-                                alert('Beberapa pesanan mungkin gagal dibuat:\n' + allMessages.join('\n'));
-                            } else {
-                                alert('Semua pesanan berhasil dibuat!');
-                            }
-
-                            this.cart = []; // Clear cart
-                            this.cartOpen = false; // Close cart
-
-                            if (allCreatedPesanIds.length > 0) {
-                                window.location.href = `{{ route('pesan.multi_summary', ['ids' => '__IDS__']) }}`
-                                    .replace('__IDS__', allCreatedPesanIds.join(','));
-                            } else {
-                                alert('Tidak ada pesanan yang berhasil dibuat.');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error saat checkout:', error);
-                            if (error.message !== 'Redirect detected') {
-                                alert('Terjadi kesalahan saat memproses pesanan: ' + error.message);
-                            }
-                        });
-                },
-                filteredMenuBaruItems() {
-                    return this.menuItems.filter(item =>
-                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-                        item.category === 'Menu Baru'
-                    );
                 },
                 filteredMenuItems() {
+                    if (!this.searchQuery) {
+                        return this.menuItems;
+                    }
                     return this.menuItems.filter(item =>
-                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-                        item.category === 'Makanan'
+                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase())
                     );
                 },
-                filteredDrinkItems() {
-                    return this.menuItems.filter(item =>
-                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-                        item.category === 'Minuman'
-                    );
-                },
-                filteredPaketItems() {
-                    return this.menuItems.filter(item =>
-                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-                        item.category === 'Paket Hemat'
-                    );
-                },
-                filteredSnackItems() {
-                    return this.menuItems.filter(item =>
-                        item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) &&
-                        item.category === 'Snack'
-                    );
-                }
             };
         }
     </script>

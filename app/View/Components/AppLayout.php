@@ -16,12 +16,18 @@ class AppLayout extends Component
     {
         $user = Auth::user();
         $lowStockMenus = collect(); // Default to empty collection
+        $adminLowStockMenus = collect(); // Default to empty collection
 
         if ($user) {
-            // Only fetch low stock menus if the user is authenticated and has menus
-            $lowStockMenus = $user->menus()->where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+            // Fetch low stock menus for all roles (all menus now)
+            $lowStockMenus = Menu::where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+            
+            // For admin, fetch all low stock menus from all users (same as lowStockMenus now)
+            if ($user->role === 'admin') {
+                $adminLowStockMenus = Menu::where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+            }
         }
 
-        return view('layouts.app', compact('lowStockMenus'));
+        return view('layouts.app', compact('lowStockMenus', 'adminLowStockMenus'));
     }
 }

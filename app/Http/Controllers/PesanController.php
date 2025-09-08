@@ -1,11 +1,11 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Pesan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Throwable; // Import Throwable
+use Throwable;
+// Import Throwable
 
 class PesanController extends Controller
 {
@@ -15,7 +15,9 @@ class PesanController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        $query = $user->pesans()->with(['menus', 'meja']);
+
+        // Tampilkan semua pesanan tanpa filter berdasarkan user
+        $query = Pesan::with(['menus', 'meja', 'user']);
 
         if ($request->has('status') && $request->status != '') {
             $query->where('status', $request->status);
@@ -38,7 +40,13 @@ class PesanController extends Controller
         // Sort payment methods alphabetically for better UX
         sort($paymentMethods);
 
-        return view('pesan.index', compact('pesans', 'statuses', 'paymentMethods'));
+        // Batasi akses hanya untuk role admin, chef, waiter, dan cashier
+        if (!in_array($user->role, ['admin', 'chef', 'waiter', 'cashier'])) {
+            abort(403, 'Unauthorized action.');
+        }else {
+            return view('pesan.index', compact('pesans', 'statuses', 'paymentMethods'));
+        }
+
     }
 
     /**
@@ -53,30 +61,25 @@ class PesanController extends Controller
     {
         try {
             $request->validate([
-                'cartItems' => 'required|array',
-                'cartItems.*.id' => 'required|exists:menus,id',
+                'cartItems'            => 'required|array',
+                'cartItems.*.id'       => 'required|exists:menus,id',
                 'cartItems.*.quantity' => 'required|integer|min:1',
-                'total' => 'required|numeric|min:0',
-                'payment_method' => 'required|string',
-                'meja_id' => 'nullable|exists:mejas,id',
-                'banner_id' => 'required|exists:banners,id',
+                'total'                => 'required|numeric|min:0',
+                'payment_method'       => 'required|string',
+                'meja_id'              => 'nullable|exists:mejas,id',
             ]);
 
             $createdPesanIds = [];
 
-            // Get the user_id from the banner_id
-            $banner = \App\Models\Banner::findOrFail($request->banner_id);
-            $ownerUserId = $banner->user_id;
-
             // Calculate total and prepare menu quantities for this single order
-            $total = 0;
+            $total          = 0;
             $menuQuantities = [];
-            $menuIds = collect($request->cartItems)->pluck('id')->unique()->all();
-            $allMenus = \App\Models\Menu::whereIn('id', $menuIds)->get()->keyBy('id');
+            $menuIds        = collect($request->cartItems)->pluck('id')->unique()->all();
+            $allMenus       = \App\Models\Menu::whereIn('id', $menuIds)->get()->keyBy('id');
 
             foreach ($request->cartItems as $item) {
                 $menu = $allMenus->get($item['id']);
-                if (!$menu) {
+                if (! $menu) {
                     continue;
                 }
 
@@ -97,14 +100,12 @@ class PesanController extends Controller
             }
 
             // Create the Pesan entry
-            $pesan = new Pesan();
-            $pesan->user_id = $ownerUserId;
-            $pesan->meja_id = $request->meja_id;
-            $pesan->total = $total;
-            $pesan->status = 'belum diantar';
-            $pesan->status_pembayaran = 'belum dibayar'; // Tambahan baru
-            $pesan->payment_method = $request->payment_method;
-            $pesan->banner_id = $request->banner_id;
+            $pesan                    = new Pesan();
+            $pesan->meja_id           = $request->meja_id;
+            $pesan->total             = $total;
+            $pesan->status            = 'belum diantar';
+            $pesan->status_pembayaran = 'belum dibayar';
+            $pesan->payment_method    = $request->payment_method;
             $pesan->save();
 
             $pesan->menus()->attach($menuQuantities);
@@ -112,9 +113,9 @@ class PesanController extends Controller
 
             if ($request->ajax()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Pesanan berhasil dibuat!',
-                    'redirect' => route('pesan.multi_summary', ['ids' => implode(',', $createdPesanIds)]),
+                    'success'           => true,
+                    'message'           => 'Pesanan berhasil dibuat!',
+                    'redirect'          => route('pesan.summary', ['pesan' => $pesan->id]),
                     'created_pesan_ids' => $createdPesanIds,
                 ]);
             }
@@ -124,21 +125,21 @@ class PesanController extends Controller
         } catch (Throwable $e) {
             // Log the error for debugging
             \Log::error('Checkout Error: ' . $e->getMessage(), [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
+                'file'         => $e->getFile(),
+                'line'         => $e->getLine(),
+                'trace'        => $e->getTraceAsString(),
+                'request_data' => $request->all(),
             ]);
 
             // Return a JSON error response
             if ($request->ajax()) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage(),
+                    'success'       => false,
+                    'message'       => 'Terjadi kesalahan saat memproses pesanan: ' . $e->getMessage(),
                     'error_details' => [
                         'file' => $e->getFile(),
                         'line' => $e->getLine(),
-                    ]
+                    ],
                 ], 500);
             }
 
@@ -152,15 +153,8 @@ class PesanController extends Controller
      */
     public function show(Pesan $pesan)
     {
-        $pesan->load(['menus', 'meja', 'banner']);
+        $pesan->load(['menus', 'meja']);
         return view('pesan.summary', compact('pesan'));
-    }
-
-    public function multiSummary(string $ids)
-    {
-        $pesanIds = explode(',', $ids);
-        $pesans = Pesan::with(['menus', 'meja', 'banner'])->whereIn('id', $pesanIds)->get();
-        return view('pesan.multi_summary', compact('pesans'));
     }
 
     /**
@@ -173,6 +167,13 @@ class PesanController extends Controller
 
     public function updateStatus(Pesan $pesan)
     {
+        $user = auth()->user();
+
+        // Batasi akses hanya untuk role admin, chef, waiter, dan cashier
+        if (! in_array($user->role, ['admin', 'chef', 'waiter', 'cashier'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $pesan->update(['status' => 'sudah diantar']);
         return redirect()->route('pesan.index')->with('success', 'Status pesanan berhasil diperbarui!');
     }
@@ -180,6 +181,13 @@ class PesanController extends Controller
     // Tambahan baru
     public function updateStatusPembayaran(Pesan $pesan)
     {
+        $user = auth()->user();
+
+        // Batasi akses hanya untuk role admin, chef, waiter, dan cashier
+        if (! in_array($user->role, ['admin', 'chef', 'waiter', 'cashier'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
         $pesan->update(['status_pembayaran' => 'sudah dibayar']);
         return redirect()->route('pesan.index')->with('success', 'Status pembayaran berhasil diperbarui!');
     }

@@ -13,10 +13,17 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
+        
+        // Jika pengguna memiliki role chef, waiter, atau cashier, arahkan ke halaman pesan
+        if (in_array($user->role, ['chef', 'waiter', 'cashier'])) {
+            // Redirect ke halaman pesan untuk role chef, waiter, atau cashier
+            return redirect()->route('pesan.index');
+        }
+        
         $baseQuery = $user->pesans();
 
         // 1. KPI Cards Data
-        $totalMenus = $user->menus()->count();
+        $totalMenus = Menu::count();
         
         $period = $request->input('period', 'today');
 
@@ -48,7 +55,6 @@ class DashboardController extends Controller
         $topSellingMenus = Menu::select('menus.nama', DB::raw('SUM(menu_pesan.quantity) as total_quantity'))
             ->join('menu_pesan', 'menus.id', '=', 'menu_pesan.menu_id')
             ->join('pesans', 'menu_pesan.pesan_id', '=', 'pesans.id')
-            ->where('menus.user_id', $user->id)
             ->where('pesans.created_at', '>=', Carbon::now()->subDays(30))
             ->groupBy('menus.id', 'menus.nama')
             ->orderBy('total_quantity', 'desc')
@@ -56,7 +62,10 @@ class DashboardController extends Controller
             ->get();
 
         // 3. Low Stock Warning
-        $lowStockMenus = $user->menus()->where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+        $lowStockMenus = Menu::where('stok', '<', 10)->orderBy('stok', 'asc')->get();
+        
+        // Untuk admin, ambil semua menu dengan stok rendah (sama dengan lowStockMenus untuk semua role)
+        $adminLowStockMenus = Menu::where('stok', '<', 10)->orderBy('stok', 'asc')->get();
 
         // 4. Recent Orders
         $pesanans = $user->pesans()->with('user')->latest()->paginate(5);
@@ -157,6 +166,7 @@ class DashboardController extends Controller
             'averageOrderValue',
             'topSellingMenus',
             'lowStockMenus',
+            'adminLowStockMenus',
             'totalMenus',
             'chartPeriod'
         ));

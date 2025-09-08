@@ -29,9 +29,9 @@
 
                 <div class="text-left">
                     <h2 class="text-2xl font-bold tracking-tight text-gray-900">Login ke Akun Anda</h2>
-                    <p class="mt-2 text-sm text-gray-600">
+                    {{-- <p class="mt-2 text-sm text-gray-600">
                         Belum punya akun? <a href="{{ route('register') }}" class="font-medium text-orange-600 hover:text-orange-500">Daftar di sini</a>
-                    </p>
+                    </p> --}}
                 </div>
 
                 <!-- Session Status -->

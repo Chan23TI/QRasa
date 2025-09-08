@@ -14,10 +14,25 @@
     <!-- Navigation -->
     <nav class="px-4 flex-1">
         <div class="space-y-4">
-
-
             <p class="text-gray-700 text-md font-bold">Manajemen Kelola</p>
-            <!-- Menu Management -->
+
+
+
+            <!-- Dashboard Link -->
+            @if (Auth::check() && Auth::user()->role !== 'admin')
+            <div>
+                <a href="{{ route('pesan.index') }}"
+                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('pesan.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
+                    <i class="fas fa-shopping-cart w-5 h-5 mr-3"></i>
+                    <span>Pesanan</span>
+                </a>
+            </div>
+            @endif
+
+            <!-- Meja Management (Admin only) -->
+
+            @if (Auth::check() && Auth::user()->role === 'admin')
+             <!-- Menu Management -->
             <div>
                 <a href="{{ route('menu.index') }}"
                     class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('menu.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
@@ -25,18 +40,13 @@
                     <span>Menu</span>
                 </a>
             </div>
-
-            <!-- Banner Management -->
             <div>
-                <a href="{{ route('banner.index') }}"
-                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('banner.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
-                    <i class="fas fa-store w-5 h-5 mr-3"></i>
-                    <span>Kantin</span>
+                <a href="{{ route('meja.index') }}"
+                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('meja.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
+                    <i class="fas fa-chair w-5 h-5 mr-3"></i>
+                    <span>Meja</span>
                 </a>
             </div>
-
-                        <!-- Dashboard Link -->
-            @if (Auth::check() && Auth::user()->role !== 'admin')
             <div>
                 <a href="{{ route('dashboard') }}"
                     class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('dashboard') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
@@ -51,21 +61,7 @@
                     <span>Pesanan</span>
                 </a>
             </div>
-            @endif
-
-            <!-- Meja Management (Admin only) -->
-            @if (Auth::check() && Auth::user()->role === 'admin')
-            <div>
-                <a href="{{ route('meja.index') }}"
-                    class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('meja.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">
-                    <i class="fas fa-chair w-5 h-5 mr-3"></i>
-                    <span>Meja</span>
-                </a>
-            </div>
-            @endif
-
-            <!-- User Management -->
-            @if (Auth::check() && Auth::user()->role === 'admin')
+             <!-- User Management -->
             <div>
                 <a href="{{ route('user.index') }}"
                     class="flex items-center px-4 py-2 text-sm font-medium rounded-lg {{ request()->routeIs('user.*') ? 'text-white bg-oren' : 'text-gray-600 hover:bg-gray-100' }} transition-colors duration-150">

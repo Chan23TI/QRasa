@@ -61,10 +61,6 @@
                             <span class="font-medium">#{{ $pesan->id }}</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-gray-600">Kantin:</span>
-                            <span class="font-medium">{{ $pesan->banner ? $pesan->banner->nama : 'N/A' }}</span>
-                        </div>
-                        <div class="flex justify-between">
                             <span class="text-gray-600">Meja:</span>
                             <span class="font-medium">{{ $pesan->meja ? $pesan->meja->nomor_meja : 'N/A' }}</span>
                         </div>

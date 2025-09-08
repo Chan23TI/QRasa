@@ -15,6 +15,5 @@ class Contact extends Model
         'ig',
         'fb',
         'email',
-
     ];
 }

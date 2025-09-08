@@ -29,9 +29,4 @@ class Pesan extends Model
     {
         return $this->belongsToMany(Menu::class)->withPivot('quantity');
     }
-
-    public function banner()
-    {
-        return $this->belongsTo(Banner::class);
-    }
 }
